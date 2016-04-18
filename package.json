@@ -1,6 +1,6 @@
 {
   "name": "hast-to-hyperscript",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Convert a HAST Node through a hyperscript interface",
   "license": "MIT",
   "keywords": [
