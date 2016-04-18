@@ -1,0 +1,63 @@
+{
+  "name": "hast-to-hyperscript",
+  "version": "0.0.0",
+  "description": "Convert a HAST Node through a hyperscript interface",
+  "license": "MIT",
+  "keywords": [
+    "hast",
+    "rehype",
+    "html",
+    "react",
+    "vdom",
+    "hyperscript"
+  ],
+  "dependencies": {
+    "property-information": "^3.0.0"
+  },
+  "files": [
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wooorm/hast-to-hyperscript.git"
+  },
+  "bugs": "https://github.com/wooorm/hast-to-hyperscript/issues",
+  "author": "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)"
+  ],
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "eslint": "^2.0.0",
+    "esmangle": "^1.0.0",
+    "hast": "0.0.2",
+    "html-to-vdom": "^0.7.0",
+    "hyperscript": "^1.4.7",
+    "is-empty": "1.0.0",
+    "istanbul": "^0.4.0",
+    "jscs": "^3.0.0",
+    "jscs-jsdoc": "^2.0.0",
+    "react": "^15.0.1",
+    "remark": "^4.0.0",
+    "remark-comment-config": "^3.0.0",
+    "remark-github": "^4.0.0",
+    "remark-lint": "^3.2.0",
+    "remark-usage": "^3.0.0",
+    "remark-validate-links": "^3.0.0",
+    "tape": "^4.0.0",
+    "vdom-to-html": "^2.2.0",
+    "virtual-dom": "^2.1.1"
+  },
+  "scripts": {
+    "build-md": "remark . --quiet --frail",
+    "build-bundle": "browserify index.js --bare -s hast-to-hyperscript > hast-to-hyperscript.js",
+    "build-mangle": "esmangle hast-to-hyperscript.js > hast-to-hyperscript.min.js",
+    "build": "npm run build-md && npm run build-bundle && npm run build-mangle",
+    "lint-api": "eslint .",
+    "lint-style": "jscs --reporter inline .",
+    "lint": "npm run lint-api && npm run lint-style",
+    "test-api": "node test/index.js",
+    "test-coverage": "istanbul cover test/index.js",
+    "test": "npm run build && npm run lint && npm run test-coverage"
+  }
+}

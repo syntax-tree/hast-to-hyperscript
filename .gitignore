@@ -1,0 +1,6 @@
+.DS_Store
+*.log
+coverage/
+node_modules/
+hast-to-hyperscript.js
+hast-to-hyperscript.min.js
