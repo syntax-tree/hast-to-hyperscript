@@ -188,6 +188,10 @@ function toH(h, node, ctx) {
  * @return {*} - Result of `h`.
  */
 function wrapper(h, node, prefix) {
+    if (typeof h !== 'function') {
+        throw new Error('h is not a function');
+    }
+
     if (!is('element', node)) {
         throw new Error('Expected element, not `' + node + '`');
     }
