@@ -1,39 +1,25 @@
 // Dependencies:
-var toHyperscript = require('./index.js');
-var React = require('react');
+var toH = require('./index.js');
 var h = require('hyperscript');
-var v = require('virtual-dom/h');
 
-// HAST Tree:
-var tree = {
-    'type': 'element',
-    'tagName': 'a',
-    'properties': {
-        'href': 'http://alpha.com',
-        'id': 'bravo',
-        'className': ['charlie', 'delta'],
-        'download': true
-    },
-    'children': [{
-        'type': 'text',
-        'value': 'Echo'
-    }]
-};
+// AST:
+var tree = { type: 'element',
+   tagName: 'p',
+   properties: { id: 'alpha', className: [ 'bravo' ] },
+   children:
+    [ { type: 'text',
+        value: 'charlie ' },
+      { type: 'element',
+        tagName: 'strong',
+        properties: { style: 'color: red;' },
+        children:
+         [ { type: 'text',
+             value: 'delta' } ] },
+      { type: 'text',
+        value: ' echo.' } ] }
 
-// Compiling with `hyperscript`:
-var result = toHyperscript(tree, h).outerHTML;
-
-// Yields:
-console.log('html', result);
-
-// Or with `virtual-dom/h`:
-result = toHyperscript(tree, v);
+// Transform (`hyperscript` needs `outerHTML` to stringify):
+var doc = toH(h, tree).outerHTML;
 
 // Yields:
-console.log('js', require('util').inspect(result));
-
-// Or `React.createElement`:
-result = toHyperscript(tree, React.createElement);
-
-// Yields:
-console.log('js', require('util').inspect(result));
+console.log('html', doc);

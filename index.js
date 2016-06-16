@@ -2,8 +2,9 @@
  * @author Titus Wormer
  * @copyright 2016 Titus Wormer
  * @license MIT
- * @module hast:to-hyperscript
- * @fileoverview HAST to virtual dom.
+ * @module hast-to-hyperscript
+ * @fileoverview Transform HAST to something else through
+ *   a hyperscript DSL.
  */
 
 'use strict';
@@ -14,228 +15,198 @@
  * Dependencies.
  */
 
+var paramCase = require('kebab-case');
 var information = require('property-information');
-
-/*
- * Methods.
- */
-
-var has = Object.prototype.hasOwnProperty;
-
-/*
- * Constants (types).
- */
-
-var T_TEXT = 'text';
-var T_ELEMENT = 'element';
-
-/*
- * Default element tag name.
- */
-
-var DEFAULT_TAG_NAME = 'div';
-
-/*
- * Delimiters.
- */
-
-var DELIMITER_COMMA = ', ';
-var DELIMITER_SPACE = ' ';
-
-/*
- * Errors.
- */
-
-var E_INVALID_NODE = 'Expected node';
-var E_INVALID_HYPERSCRIPT = 'Expected `hyperscript`, ' +
-    '`virtual-hyperscript`, `React.createElement`, or similar';
+var spaces = require('space-separated-tokens');
+var commas = require('comma-separated-tokens');
+var is = require('unist-util-is');
 
 /**
- * Compile a `properties` object to hyperscript applicable
- * properties (and attributes?).
+ * Check if `h` is `virtual-dom/h`.  It’s the only
+ * hyperscript “compatible” interface needing `attributes`.
  *
- * @param {Object?} properties - HAST properties.
- * @param {Function} h - `virtual-hyperscript`.
- * @return {Object?} - Virtual properties.
+ * @param {Function} h - Hyperscript interface.
+ * @return {boolean} - Whether `h` is `virtual-dom/h`.
  */
-function props(properties, h) {
-    var result = {};
-    var attributes = {};
-    var hasAttributes;
-    var hasProperties;
-    var value;
-    var info;
-    var key;
-    var isVirtual;
-    var isHyperscript;
-    var property;
-    var attribute;
-    var name;
+function vdom(h) {
+    try {
+        return h('div').type === 'VirtualNode';
+    } catch (e) { /* Empty */ }
 
-    if (!properties) {
-        return null;
-    }
-
-    isVirtual = typeof h(DEFAULT_TAG_NAME).hasWidgets === 'boolean';
-    isHyperscript = 'cleanup' in h;
-
-    for (key in properties) {
-        value = properties[key];
-
-        if (
-            value === null ||
-            value === undefined ||
-            /* Boolean `false` for (overloaded) boolean values */
-            value === false ||
-            /* NaN check for number values */
-            value !== value
-        ) {
-            continue;
-        }
-
-        info = information(key);
-        hasProperties = true;
-
-        if (typeof value === 'object' && 'length' in value) {
-            value = value.join(
-                info.commaSeparated ? DELIMITER_COMMA : DELIMITER_SPACE
-            );
-        }
-
-        property = (info && info.propertyName) || key;
-        attribute = (info && info.name) || key;
-
-        /*
-         * virtual-hyperscript disambiguates between
-         * “properties” and “attributes”.
-         *
-         * Also: https://github.com/TimBeyer/html-to-vdom/issues/24
-         */
-
-        if (isVirtual && (!info || info.mustUseAttribute)) {
-            hasAttributes = true;
-            attributes[attribute] = value;
-        } else {
-            name = property;
-
-            /*
-             * Hyperscript doesn’t have an interface for
-             * boolean attributes; so the attribute name
-             * must be given.
-             */
-
-            if (isHyperscript && value === true) {
-                value = attribute;
-            }
-
-            if (isHyperscript && attribute.indexOf('xml:') === 0) {
-                name = attribute;
-            }
-
-            result[name] = value;
-        }
-    }
-
-    if (hasAttributes) {
-        result.attributes = attributes;
-    }
-
-    return hasProperties ? result : undefined;
+    return false
 }
 
 /**
- * Convert children of `node` to virtual nodes.
+ * Check if `h` is `hyperscript`.  It doesn’t accept
+ * `class` as an attribute, it must be added through the
+ * `selector`.
  *
- * @param {HASTNode} node - Hast node.
- * @param {Function} h - `virtual-hyperscript`.
- * @return {Array.<VNode>} - Virtual nodes.
+ * @param {Function} h - Hyperscript interface.
+ * @return {boolean} - Whether `h` is `hyperscript`.
  */
-function all(node, h) {
-    var children = node.children;
-    var length = children.length;
-    var index = -1;
-    var results = [];
-    var result;
+function hyperscript(h) {
+    return h && h.context && h.cleanup;
+}
+
+/**
+ * Check if `h` is `react.createElement`.  It doesn’t accept
+ * `class` as an attribute, it must be added through the
+ * `selector`.
+ *
+ * @param {Function} h - Hyperscript interface.
+ * @return {boolean} - Whether `h` is `hyperscript`.
+ */
+function react(h) {
+    var node = h && h('div');
+
+    return node && node._store && node._owner == null;
+}
+
+/**
+ * Add `name` and its `value` to `props`.
+ *
+ * @param {Object} props - Attributes.
+ * @param {string} name - Property name.
+ * @param {*} value - Property value.
+ * @param {Object} ctx - Hypertext info.
+ */
+function addAttribute(props, name, value, ctx) {
+    var info = information(name) || {};
+
+    /* Ignore nully, `false`, `NaN`, and falsey known
+     * booleans. */
+    if (
+        value == null ||
+        value === false ||
+        value !== value ||
+        (info.boolean && !value)
+    ) {
+        return;
+    }
+
+    name = info.name || paramCase(name);
+
+    if (info.boolean) {
+        /* Treat `true` and truthy known booleans. */
+        value = '';
+    } else if (typeof value === 'object' && 'length' in value) {
+        /* Accept `array`.  Most props are space-separater. */
+        value = (info.commaSeparated ? commas : spaces).stringify(value);
+    }
+
+    value = String(value || '');
+
+    if (
+        ctx.vdom &&
+        info.name !== 'class' &&
+        (info.mustUseAttribute || !info.name)
+    ) {
+        if (!props.attributes) {
+            props.attributes = {};
+        }
+
+        props.attributes[name] = value;
+
+        return;
+    }
+
+    props[info.propertyName || name] = value;
+}
+
+/**
+ * Transform a HAST node through a hyperscript interface
+ * to *anything*!
+ *
+ * @param {Function} h - Hyperscript interface.
+ * @param {HASTElementNode} node - Element node.
+ * @param {Object} ctx - Hypertext info.
+ * @throws {Error} - If `node` is node an element.
+ * @return {*} - Result of `h`.
+ */
+function toH(h, node, ctx) {
+    var selector = node.tagName;
+    var properties;
+    var attributes;
+    var children;
+    var property;
+    var elements;
+    var length;
+    var index;
+    var value;
+
+    properties = node.properties;
+    attributes = {};
+
+    for (property in properties) {
+        addAttribute(attributes, property, properties[property], ctx);
+    }
+
+    if (ctx.vdom) {
+        selector = selector.toUpperCase();
+    }
+
+    if (ctx.hyperscript && attributes.id) {
+        selector += '#' + attributes.id;
+        delete attributes.id;
+    }
+
+    if ((ctx.hyperscript || ctx.vdom) && attributes.className) {
+        selector += '.' + spaces.parse(attributes.className).join('.');
+        delete attributes.className;
+    }
+
+    if (ctx.prefix) {
+        ctx.key++;
+        attributes.key = ctx.prefix + ctx.key;
+    }
+
+    elements = [];
+    children = node.children || [];
+    length = children.length;
+    index = -1;
 
     while (++index < length) {
-        result = one(children[index], h);
+        value = children[index];
 
-        if (result) {
-            results.push(result);
+        if (is('element', value)) {
+            elements.push(toH(h, value, ctx));
+        } else if (is('text', value)) {
+            elements.push(value.value);
         }
     }
 
-    return results;
+    return h(selector, attributes, elements);
 }
 
 /**
- * Convert a HAST `node` to a virtual node.
+ * Wrapper around `toH`.
  *
- * @param {HASTNode} node - Hast node.
- * @param {Function} h - `virtual-hyperscript`.
- * @return {VNode} - Virtual node.
+ * @param {Function} h - Hyperscript interface.
+ * @param {HASTElementNode} node - Element node.
+ * @param {string?} [prefix] - Unique identifier.
+ * @throws {Error} - If `node` is node an element.
+ * @return {*} - Result of `h`.
  */
-function one(node, h) {
-    var children;
-    var result;
-
-    if (!node || !node.type) {
-        throw new Error(E_INVALID_NODE);
+function wrapper(h, node, prefix) {
+    if (!is('element', node)) {
+        throw new Error('Expected element, not `' + node + '`');
     }
 
-    /*
-     * Wrap the `text` in a `div` so we can get it through
-     * `h`. Needed as all but React expose custom objects.
-     */
-
-    if (node.type === T_TEXT) {
-        result = h(DEFAULT_TAG_NAME, null, [node.value]);
-
-        /* React: */
-        if (has.call(result, '$$typeof')) {
-            return result.props.children[0];
-        }
-
-        /* Hyperscript: */
-        if (result.childNodes) {
-            result = result.childNodes[0];
-            result.parentElement = null;
-
-            return result;
-        }
-
-        /* virtual-dom/h */
-        return result.children[0];
+    if (prefix == null) {
+        prefix = react(h) || vdom(h) ? 'h-' : false;
     }
 
-    if (node.children) {
-        children = all(node, h);
-    }
-
-    if (node.type === T_ELEMENT) {
-        return h(node.tagName, props(node.properties, h), children);
-    }
-
-    return children;
-}
-
-/**
- * Wrapper to ensure `h` is given.
- *
- * @param {HASTNode} node - Hast node.
- * @param {Function} h - `virtual-hyperscript`.
- * @return {VNode} - Virtual node.
- */
-function toHyperscript(node, h) {
-    if (typeof h !== 'function') {
-        throw new Error(E_INVALID_HYPERSCRIPT);
-    }
-
-    return one(node, h);
+    return toH(h, node, {
+        prefix: prefix,
+        key: 0,
+        react: react(h),
+        vdom: vdom(h),
+        hyperscript: hyperscript(h)
+    });
 }
 
 /*
  * Expose.
  */
 
-module.exports = toHyperscript;
+module.exports = wrapper;

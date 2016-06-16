@@ -1,8 +1,8 @@
-# hast-to-hyperscript [![Build Status][build-badge]][build-page] [![Coverage Status][coverage-badge]][coverage-page]
+# hast-to-hyperscript [![Build Status][travis-badge]][travis] [![Coverage Status][codecov-badge]][codecov]
 
-Convert a [HAST][] [Node][node] to another virtual node through
-a hyperscript compatible interface such as [virtual dom][vdom],
-[`React.createElement`][react], or [hyperscript][].
+<!--lint disable heading-increment list-item-spacing no-duplicate-headings-->
+
+Transform [HAST][] to something else through a [hyperscript][] DSL.
 
 ## Installation
 
@@ -12,121 +12,95 @@ a hyperscript compatible interface such as [virtual dom][vdom],
 npm install hast-to-hyperscript
 ```
 
-**hast-to-hyperscript** is also available as an AMD, CommonJS, and
-globals module, [uncompressed and compressed][releases].
+**hast-to-hyperscript** is also available as an AMD, CommonJS, and globals
+module, [uncompressed and compressed][releases].
 
 ## Usage
 
 Dependencies:
 
 ```javascript
-var toHyperscript = require('hast-to-hyperscript');
-var React = require('react');
+var toH = require('hast-to-hyperscript');
 var h = require('hyperscript');
-var v = require('virtual-dom/h');
 ```
 
-HAST Tree:
+AST:
 
 ```javascript
-var tree = {
-    'type': 'element',
-    'tagName': 'a',
-    'properties': {
-        'href': 'http://alpha.com',
-        'id': 'bravo',
-        'className': ['charlie', 'delta'],
-        'download': true
-    },
-    'children': [{
-        'type': 'text',
-        'value': 'Echo'
-    }]
-};
+var tree = { type: 'element',
+   tagName: 'p',
+   properties: { id: 'alpha', className: [ 'bravo' ] },
+   children:
+    [ { type: 'text',
+        value: 'charlie ' },
+      { type: 'element',
+        tagName: 'strong',
+        properties: { style: 'color: red;' },
+        children:
+         [ { type: 'text',
+             value: 'delta' } ] },
+      { type: 'text',
+        value: ' echo.' } ] }
 ```
 
-Compiling with `hyperscript`:
+Transform (`hyperscript` needs `outerHTML` to stringify):
 
 ```javascript
-var result = toHyperscript(tree, h).outerHTML;
+var doc = toH(h, tree).outerHTML;
 ```
 
 Yields:
 
 ```html
-<a href="http://alpha.com" id="bravo" download="download" class="charlie delta">Echo</a>
-```
-
-Or with `virtual-dom/h`:
-
-```javascript
-result = toHyperscript(tree, v);
-```
-
-Yields:
-
-```js
-VirtualNode {
-  tagName: 'A',
-  properties:
-   { href: 'http://alpha.com',
-     id: 'bravo',
-     download: true,
-     attributes: { class: 'charlie delta' } },
-  children: [ VirtualText { text: 'Echo' } ],
-  key: undefined,
-  namespace: null,
-  count: 1,
-  hasWidgets: false,
-  hasThunks: false,
-  hooks: undefined,
-  descendantHooks: false }
-```
-
-Or `React.createElement`:
-
-```javascript
-result = toHyperscript(tree, React.createElement);
-```
-
-Yields:
-
-```js
-{ '$$typeof': Symbol(react.element),
-  type: 'a',
-  key: null,
-  ref: null,
-  props:
-   { href: 'http://alpha.com',
-     id: 'bravo',
-     className: 'charlie delta',
-     download: true,
-     children: [ 'Echo' ] },
-  _owner: null,
-  _store: {} }
+<p class="bravo" id="alpha">charlie <strong>delta</strong> echo.</p>
 ```
 
 ## API
 
-### `toHyperscript(node, h)`
+### `toH(h, node[, prefix])`
 
-Convert a [HAST][] [Node][node] to another virtual node through
-a hyperscript compatible interface such as [virtual dom][vdom],
-[`React.createElement`][react], or [hyperscript][].
+Transform [HAST][] to something else through a [hyperscript][] DSL.
 
-Note that, although the signatures of the above mentioned “compatible”
-interfaces are the same, they differ in how they handle text or
-properties.  Other “compatible” interfaces might not be “compatible”.
+###### Parameters
 
-**Parameters**:
+*   `h` ([`Function`][h]);
+*   `node` ([`Element`][element]);
+*   `prefix` (`string` or `boolean`, optional)
+    — Prefix to use as a prefix for keys passed in `attrs` to `h()`,
+    this behaviour is turned off by passing `false`, turned on by passing
+    a `string`.  By default, `h-` is used as a prefix if the given `h`
+    is detected as being `virtual-dom/h` or `React.createElement`.
 
-*   `node` (HAST [`Node`][node]) — Node to convert;
-*   `h` (`Function`) — Hyperscript compatible interface.
+###### Returns
 
-**Returns**: `Array|Object?` — A node, created through invoking `h()`.
-`undefined` is returned if the given HAST node is neither element nor
-text (such as comments, character-data, or doctypes).
-[Root][] nodes result in `Array.<Object>`.
+`*` — Anything returned by invoking `h()`.
+
+### `function h(name, attrs, children)`
+
+Transform [HAST][] to something else through a hyperscript DSL.
+
+###### Parameters
+
+*   `name` (`string`) — Tag-name of element to create.
+*   `attrs` (`Object.<string>`) — Attributes to set.
+*   `children` (`Array.<* | string>`) — List of children and text,
+    where children are the result of invoking `h()` previously.
+
+###### Returns
+
+`*` — Anything.
+
+###### Caveats
+
+Although there are lots of libs mentioning support for this interface,
+there are significant differences between them.  For example, hyperscript
+doesn’t support classes in `attrs`, `virtual-dom/h` needs an `attributes`
+object inside `attrs` most of the time.  `hast-to-hyperscript` works
+around these differences for:
+
+*   [`React.createElement`][react];
+*   [`virtual-dom/h`][vdom];
+*   [`hyperscript`][hyperscript].
 
 ## License
 
@@ -134,13 +108,13 @@ text (such as comments, character-data, or doctypes).
 
 <!-- Definitions -->
 
-[build-badge]: https://img.shields.io/travis/wooorm/hast-to-hyperscript.svg
+[travis-badge]: https://img.shields.io/travis/wooorm/hast-to-hyperscript.svg
 
-[build-page]: https://travis-ci.org/wooorm/hast-to-hyperscript
+[travis]: https://travis-ci.org/wooorm/hast-to-hyperscript
 
-[coverage-badge]: https://img.shields.io/codecov/c/github/wooorm/hast-to-hyperscript.svg
+[codecov-badge]: https://img.shields.io/codecov/c/github/wooorm/hast-to-hyperscript.svg
 
-[coverage-page]: https://codecov.io/github/wooorm/hast-to-hyperscript?branch=master
+[codecov]: https://codecov.io/github/wooorm/hast-to-hyperscript
 
 [npm]: https://docs.npmjs.com/cli/install
 
@@ -152,12 +126,12 @@ text (such as comments, character-data, or doctypes).
 
 [hast]: https://github.com/wooorm/hast
 
-[node]: https://github.com/wooorm/hast#node
-
-[root]: https://github.com/wooorm/hast#root
-
-[hyperscript]: https://github.com/dominictarr/hyperscript
+[element]: https://github.com/wooorm/hast#element
 
 [vdom]: https://github.com/Matt-Esch/virtual-dom/tree/master/virtual-hyperscript
 
-[react]: https://facebook.github.io/react/docs/top-level-api.html#react.createelement
+[hyperscript]: https://github.com/dominictarr/hyperscript
+
+[h]: #function-hname-attrs-children
+
+[react]: https://facebook.github.io/react/docs/glossary.html#react-elements
