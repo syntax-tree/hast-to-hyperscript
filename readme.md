@@ -102,6 +102,10 @@ around these differences for:
 *   [`virtual-dom/h`][vdom];
 *   [`hyperscript`][hyperscript].
 
+## Related
+
+*   [`hastscript`][hastscript].
+
 ## License
 
 [MIT][license] © [Titus Wormer][author]
@@ -135,3 +139,5 @@ around these differences for:
 [h]: #function-hname-attrs-children
 
 [react]: https://facebook.github.io/react/docs/glossary.html#react-elements
+
+[hastscript]: https://github.com/wooorm/hastscript
