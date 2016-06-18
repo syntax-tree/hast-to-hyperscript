@@ -33,7 +33,8 @@ function vdom(h) {
         return h('div').type === 'VirtualNode';
     } catch (e) { /* Empty */ }
 
-    return false
+    /* istanbul ignore next */
+    return false;
 }
 
 /**
