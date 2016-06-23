@@ -2,6 +2,11 @@
 
 <!--lint disable no-multiple-toplevel-headings -->
 
+2.0.2 / 2016-06-23
+==================
+
+*   Fix warnings in react for void elements w/ children ([`b0bff0d`](https://github.com/wooorm/hast-to-hyperscript/commit/b0bff0d))
+
 2.0.1 / 2016-06-18
 ==================
 
