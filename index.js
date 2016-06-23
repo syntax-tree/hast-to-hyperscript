@@ -176,6 +176,12 @@ function toH(h, node, ctx) {
         }
     }
 
+    /* Ensure no React warnings are triggered for
+     * void elements having children passed in. */
+    if (!elements.length) {
+        elements = undefined;
+    }
+
     return h(selector, attributes, elements);
 }
 
