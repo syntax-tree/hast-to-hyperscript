@@ -1,6 +1,6 @@
 {
   "name": "hast-to-hyperscript",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Transform HAST to something else through a hyperscript DSL",
   "license": "MIT",
   "keywords": [
