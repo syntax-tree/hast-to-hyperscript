@@ -60,7 +60,7 @@ function hyperscript(h) {
 function react(h) {
     var node = h && h('div');
 
-    return node && node._store && node._owner == null;
+    return node && node._store && node.key == null;
 }
 
 /**
