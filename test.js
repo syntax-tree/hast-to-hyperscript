@@ -26,11 +26,11 @@ test('hast-to-hyperscript', function (t) {
   t.test('should throw if not given a node', function (st) {
     t.throws(function () {
       toH(h);
-    }, /Expected node/);
+    }, /Expected element, not `undefined`/);
 
     t.throws(function () {
       toH(h, 'text');
-    }, /Expected node/);
+    }, /Error: Expected element, not `text`/);
 
     t.throws(function () {
       toH(h, u('text', 'value'));

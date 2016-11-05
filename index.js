@@ -147,7 +147,7 @@ function addAttribute(props, name, value, ctx) {
  * `selector`. */
 function react(h) {
   var node = h && h('div');
-  return node && node._store && (node.key === null || node.key === undefined);
+  return node && node._store && node.key === null;
 }
 
 /* Check if `h` is `hyperscript`.  It doesn’t accept

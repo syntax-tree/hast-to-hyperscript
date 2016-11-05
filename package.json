@@ -31,16 +31,14 @@
     "kebab-case": "^1.0.0",
     "property-information": "^3.0.0",
     "space-separated-tokens": "^1.0.0",
-    "unist-util-is": "^1.0.0"
+    "unist-util-is": "^2.0.0"
   },
   "devDependencies": {
     "browserify": "^13.0.0",
     "circular.js": "^2.0.3",
     "esmangle": "^1.0.0",
-    "hyperscript": "^1.4.7",
+    "hyperscript": "^2.0.2",
     "istanbul": "^0.4.0",
-    "jscs": "^3.0.0",
-    "jscs-jsdoc": "^2.0.0",
     "react": "^15.1.0",
     "remark-cli": "^2.1.0",
     "remark-preset-wooorm": "^1.0.0",
