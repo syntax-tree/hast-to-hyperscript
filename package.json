@@ -42,19 +42,15 @@
     "jscs": "^3.0.0",
     "jscs-jsdoc": "^2.0.0",
     "react": "^15.1.0",
-    "remark-cli": "^1.0.0",
-    "remark-comment-config": "^4.0.0",
-    "remark-github": "^5.0.0",
-    "remark-lint": "^4.0.0",
-    "remark-usage": "^4.0.0",
-    "remark-validate-links": "^4.0.0",
+    "remark-cli": "^2.1.0",
+    "remark-preset-wooorm": "^1.0.0",
     "tape": "^4.0.0",
     "unist-builder": "^1.0.1",
     "virtual-dom": "^2.1.1",
     "xo": "^0.17.0"
   },
   "scripts": {
-    "build-md": "remark . --quiet --frail",
+    "build-md": "remark . --quiet --frail --output",
     "build-bundle": "browserify index.js --bare -s hast-to-hyperscript > hast-to-hyperscript.js",
     "build-mangle": "esmangle hast-to-hyperscript.js > hast-to-hyperscript.min.js",
     "build": "npm run build-md && npm run build-bundle && npm run build-mangle",
@@ -68,5 +64,8 @@
     "rules": {
       "guard-for-in": "off"
     }
+  },
+  "remarkConfig": {
+    "presets": "wooorm"
   }
 }

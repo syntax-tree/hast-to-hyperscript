@@ -1,7 +1,5 @@
 # hast-to-hyperscript [![Build Status][travis-badge]][travis] [![Coverage Status][codecov-badge]][codecov]
 
-<!--lint disable heading-increment list-item-spacing no-duplicate-headings-->
-
 Transform [HAST][] to something else through a [hyperscript][] DSL.
 
 ## Installation
