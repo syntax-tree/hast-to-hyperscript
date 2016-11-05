@@ -38,7 +38,7 @@
     "circular.js": "^2.0.3",
     "esmangle": "^1.0.0",
     "hyperscript": "^2.0.2",
-    "istanbul": "^0.4.0",
+    "nyc": "^8.4.0",
     "react": "^15.1.0",
     "remark-cli": "^2.1.0",
     "remark-preset-wooorm": "^1.0.0",
@@ -53,9 +53,15 @@
     "build-mangle": "esmangle hast-to-hyperscript.js > hast-to-hyperscript.min.js",
     "build": "npm run build-md && npm run build-bundle && npm run build-mangle",
     "lint": "xo",
-    "test-api": "node test.js",
-    "test-coverage": "istanbul cover test.js",
+    "test-api": "node test",
+    "test-coverage": "nyc --reporter lcov tape test.js",
     "test": "npm run build && npm run lint && npm run test-coverage"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "lines": 100,
+    "functions": 100,
+    "branches": 100
   },
   "xo": {
     "space": true,
