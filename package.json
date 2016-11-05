@@ -27,6 +27,7 @@
   ],
   "dependencies": {
     "comma-separated-tokens": "^1.0.0",
+    "is-nan": "^1.2.1",
     "kebab-case": "^1.0.0",
     "property-information": "^3.0.0",
     "space-separated-tokens": "^1.0.0",
@@ -35,7 +36,6 @@
   "devDependencies": {
     "browserify": "^13.0.0",
     "circular.js": "^2.0.3",
-    "eslint": "^2.0.0",
     "esmangle": "^1.0.0",
     "hyperscript": "^1.4.7",
     "istanbul": "^0.4.0",
@@ -50,18 +50,23 @@
     "remark-validate-links": "^4.0.0",
     "tape": "^4.0.0",
     "unist-builder": "^1.0.1",
-    "virtual-dom": "^2.1.1"
+    "virtual-dom": "^2.1.1",
+    "xo": "^0.17.0"
   },
   "scripts": {
     "build-md": "remark . --quiet --frail",
     "build-bundle": "browserify index.js --bare -s hast-to-hyperscript > hast-to-hyperscript.js",
     "build-mangle": "esmangle hast-to-hyperscript.js > hast-to-hyperscript.min.js",
     "build": "npm run build-md && npm run build-bundle && npm run build-mangle",
-    "lint-api": "eslint .",
-    "lint-style": "jscs --reporter inline .",
-    "lint": "npm run lint-api && npm run lint-style",
+    "lint": "xo",
     "test-api": "node test.js",
     "test-coverage": "istanbul cover test.js",
     "test": "npm run build && npm run lint && npm run test-coverage"
+  },
+  "xo": {
+    "space": true,
+    "rules": {
+      "guard-for-in": "off"
+    }
   }
 }
