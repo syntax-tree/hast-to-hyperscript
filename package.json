@@ -18,9 +18,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/wooorm/hast-to-hyperscript.git"
+    "url": "https://github.com/syntax-tree/hast-to-hyperscript.git"
   },
-  "bugs": "https://github.com/wooorm/hast-to-hyperscript/issues",
+  "bugs": "https://github.com/syntax-tree/hast-to-hyperscript/issues",
   "author": "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
   "contributors": [
     "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)"

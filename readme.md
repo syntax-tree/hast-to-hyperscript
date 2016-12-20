@@ -10,9 +10,6 @@ Transform [HAST][] to something else through a [hyperscript][] DSL.
 npm install hast-to-hyperscript
 ```
 
-**hast-to-hyperscript** is also available as an AMD, CommonJS, and globals
-module, [uncompressed and compressed][releases].
-
 ## Usage
 
 Dependencies:
@@ -110,25 +107,23 @@ around these differences for:
 
 <!-- Definitions -->
 
-[travis-badge]: https://img.shields.io/travis/wooorm/hast-to-hyperscript.svg
+[travis-badge]: https://img.shields.io/travis/syntax-tree/hast-to-hyperscript.svg
 
-[travis]: https://travis-ci.org/wooorm/hast-to-hyperscript
+[travis]: https://travis-ci.org/syntax-tree/hast-to-hyperscript
 
-[codecov-badge]: https://img.shields.io/codecov/c/github/wooorm/hast-to-hyperscript.svg
+[codecov-badge]: https://img.shields.io/codecov/c/github/syntax-tree/hast-to-hyperscript.svg
 
-[codecov]: https://codecov.io/github/wooorm/hast-to-hyperscript
+[codecov]: https://codecov.io/github/syntax-tree/hast-to-hyperscript
 
 [npm]: https://docs.npmjs.com/cli/install
-
-[releases]: https://github.com/wooorm/hast-to-hyperscript/releases
 
 [license]: LICENSE
 
 [author]: http://wooorm.com
 
-[hast]: https://github.com/wooorm/hast
+[hast]: https://github.com/syntax-tree/hast
 
-[element]: https://github.com/wooorm/hast#element
+[element]: https://github.com/syntax-tree/hast#element
 
 [vdom]: https://github.com/Matt-Esch/virtual-dom/tree/master/virtual-hyperscript
 
@@ -138,4 +133,4 @@ around these differences for:
 
 [react]: https://facebook.github.io/react/docs/glossary.html#react-elements
 
-[hastscript]: https://github.com/wooorm/hastscript
+[hastscript]: https://github.com/syntax-tree/hastscript
