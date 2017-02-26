@@ -1,6 +1,7 @@
 'use strict';
 
 /* Dependencies. */
+var trim = require('trim');
 var paramCase = require('kebab-case');
 var information = require('property-information');
 var spaces = require('space-separated-tokens');
@@ -66,6 +67,23 @@ function toH(h, node, ctx) {
   if ((ctx.hyperscript || ctx.vdom) && attributes.className) {
     selector += '.' + spaces.parse(attributes.className).join('.');
     delete attributes.className;
+  }
+
+  if (typeof attributes.style === 'string') {
+    /* VDOM expects a `string` style in `attributes`
+     * See https://github.com/Matt-Esch/virtual-dom/blob/947ecf9/
+     * docs/vnode.md#propertiesstyle-vs-propertiesattributesstyle */
+    if (ctx.vdom) {
+      if (!attributes.attributes) {
+        attributes.attributes = {};
+      }
+
+      attributes.attributes.style = attributes.style;
+      delete attributes.style;
+    /* React only accepts `style` as object. */
+    } else if (ctx.react) {
+      attributes.style = parseStyle(attributes.style);
+    }
   }
 
   if (ctx.prefix) {
@@ -167,4 +185,37 @@ function vdom(h) {
 
   /* istanbul ignore next */
   return false;
+}
+
+function parseStyle(value) {
+  var result = {};
+  var declarations = value.split(';');
+  var length = declarations.length;
+  var index = -1;
+  var declaration;
+  var prop;
+  var pos;
+
+  while (++index < length) {
+    declaration = declarations[index];
+    pos = declaration.indexOf(':');
+    if (pos !== -1) {
+      prop = camelCase(trim(declaration.slice(0, pos)));
+      result[prop] = trim(declaration.slice(pos + 1));
+    }
+  }
+
+  return result;
+}
+
+function camelCase(val) {
+  if (val.slice(0, 4) === '-ms-') {
+    val = 'ms-' + val.slice(4);
+  }
+
+  return val.replace(/-([a-z])/g, replace);
+}
+
+function replace($0, $1) {
+  return $1.toUpperCase();
 }

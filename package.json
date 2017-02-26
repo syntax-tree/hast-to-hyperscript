@@ -31,6 +31,7 @@
     "kebab-case": "^1.0.0",
     "property-information": "^3.0.0",
     "space-separated-tokens": "^1.0.0",
+    "trim": "0.0.1",
     "unist-util-is": "^2.0.0"
   },
   "devDependencies": {
@@ -70,6 +71,8 @@
     }
   },
   "remarkConfig": {
-    "plugins": ["preset-wooorm"]
+    "plugins": [
+      "preset-wooorm"
+    ]
   }
 }

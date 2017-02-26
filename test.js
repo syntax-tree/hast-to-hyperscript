@@ -86,9 +86,8 @@ test('hast-to-hyperscript', function (t) {
       'bravo ',
       v('strong', {
         key: 'h-2',
-        style: 'color: red',
         accept: '.jpg, .jpeg',
-        attributes: {'camel-case': 'on off'}
+        attributes: {style: 'color: red', 'camel-case': 'on off'}
       }, 'charlie'),
       ' delta'
     ])),
@@ -109,7 +108,7 @@ test('hast-to-hyperscript', function (t) {
       'bravo ',
       r('strong', {
         key: 'h-2',
-        style: 'color: red',
+        style: {color: 'red'},
         'camel-case': 'on off',
         accept: '.jpg, .jpeg'
       }, ['charlie']),
@@ -141,6 +140,37 @@ test('hast-to-hyperscript', function (t) {
       toH(r, u('element', {tagName: 'div'})).key,
       'h-1',
       'should patch `keys` on react'
+    );
+
+    st.deepEqual(
+      toH(v, u('element', {tagName: 'div', properties: {style: 'color: red'}})).properties.attributes.style,
+      'color: red',
+      'vdom: should patch a style declaration correctly'
+    );
+
+    st.deepEqual(
+      toH(r, u('element', {tagName: 'div', properties: {style: 'color: red'}})).props.style,
+      {color: 'red'},
+      'react: should parse a style declaration'
+    );
+
+    st.deepEqual(
+      toH(r, u('element', {tagName: 'div', properties: {
+        style: 'color: red; background-color: blue; -moz-transition: initial; -ms-transition: unset'
+      }})).props.style,
+      {
+        color: 'red',
+        backgroundColor: 'blue',
+        msTransition: 'unset',
+        MozTransition: 'initial'
+      },
+      'react: should parse vendor prefixed in style declarations'
+    );
+
+    st.deepEqual(
+      toH(r, u('element', {tagName: 'div', properties: {style: '; color; border: 1;'}})).props.style,
+      {border: '1'},
+      'react: should parse an invalid style declaration'
     );
 
     st.end();
