@@ -12,16 +12,10 @@ npm install hast-to-hyperscript
 
 ## Usage
 
-Dependencies:
-
 ```javascript
 var toH = require('hast-to-hyperscript');
 var h = require('hyperscript');
-```
 
-AST:
-
-```javascript
 var tree = { type: 'element',
    tagName: 'p',
    properties: { id: 'alpha', className: [ 'bravo' ] },
@@ -36,11 +30,8 @@ var tree = { type: 'element',
              value: 'delta' } ] },
       { type: 'text',
         value: ' echo.' } ] }
-```
 
-Transform (`hyperscript` needs `outerHTML` to stringify):
-
-```javascript
+// Transform (`hyperscript` needs `outerHTML` to stringify):
 var doc = toH(h, tree).outerHTML;
 ```
 
