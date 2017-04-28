@@ -13,17 +13,14 @@
     "dsl",
     "html"
   ],
-  "files": [
-    "index.js"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/syntax-tree/hast-to-hyperscript.git"
-  },
+  "repository": "syntax-tree/hast-to-hyperscript",
   "bugs": "https://github.com/syntax-tree/hast-to-hyperscript/issues",
   "author": "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
   "contributors": [
     "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)"
+  ],
+  "files": [
+    "index.js"
   ],
   "dependencies": {
     "comma-separated-tokens": "^1.0.0",
