@@ -46,7 +46,7 @@
     "tape": "^4.0.0",
     "unist-builder": "^1.0.1",
     "virtual-dom": "^2.1.1",
-    "xo": "^0.17.0"
+    "xo": "^0.18.0"
   },
   "scripts": {
     "build-md": "remark . -qfo",
@@ -66,7 +66,9 @@
   },
   "xo": {
     "space": true,
+    "esnext": false,
     "rules": {
+      "unicorn/prefer-type-error": "off",
       "guard-for-in": "off"
     }
   },

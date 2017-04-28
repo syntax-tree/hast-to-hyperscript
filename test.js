@@ -49,9 +49,9 @@ test('hast-to-hyperscript', function (t) {
       tagName: 'strong',
       properties: {
         style: 'color: red',
-        // unknown booleans are ignored.
+        // Unknown booleans are ignored.
         ignored: false,
-        // falsey known booleans are ignore.
+        // Falsey known booleans are ignore.
         disabled: 0,
         // Unknown props are dash-cased.
         // Unknown lists are space-separated.
