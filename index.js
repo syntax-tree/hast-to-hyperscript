@@ -1,6 +1,5 @@
 'use strict';
 
-/* Dependencies. */
 var trim = require('trim');
 var paramCase = require('kebab-case');
 var information = require('property-information');
@@ -9,10 +8,8 @@ var commas = require('comma-separated-tokens');
 var nan = require('is-nan');
 var is = require('unist-util-is');
 
-/* Expose. */
 module.exports = wrapper;
 
-/* Wrapper around `toH`. */
 function wrapper(h, node, prefix) {
   var r;
   var v;
