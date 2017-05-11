@@ -14,6 +14,9 @@ module.exports = wrapper;
 
 /* Wrapper around `toH`. */
 function wrapper(h, node, prefix) {
+  var r;
+  var v;
+
   if (typeof h !== 'function') {
     throw new Error('h is not a function');
   }
@@ -22,15 +25,18 @@ function wrapper(h, node, prefix) {
     throw new Error('Expected element, not `' + node + '`');
   }
 
+  r = react(h);
+  v = vdom(h);
+
   if (prefix === null || prefix === undefined) {
-    prefix = react(h) || vdom(h) ? 'h-' : false;
+    prefix = r === true || v === true ? 'h-' : false;
   }
 
   return toH(h, node, {
     prefix: prefix,
     key: 0,
-    react: react(h),
-    vdom: vdom(h),
+    react: r,
+    vdom: v,
     hyperscript: hyperscript(h)
   });
 }
@@ -55,16 +61,16 @@ function toH(h, node, ctx) {
     addAttribute(attributes, property, properties[property], ctx);
   }
 
-  if (ctx.vdom) {
+  if (ctx.vdom === true) {
     selector = selector.toUpperCase();
   }
 
-  if (ctx.hyperscript && attributes.id) {
+  if (ctx.hyperscript === true && attributes.id) {
     selector += '#' + attributes.id;
     delete attributes.id;
   }
 
-  if ((ctx.hyperscript || ctx.vdom) && attributes.className) {
+  if ((ctx.hyperscript === true || ctx.vdom === true) && attributes.className) {
     selector += '.' + spaces.parse(attributes.className).join('.');
     delete attributes.className;
   }
@@ -73,7 +79,7 @@ function toH(h, node, ctx) {
     /* VDOM expects a `string` style in `attributes`
      * See https://github.com/Matt-Esch/virtual-dom/blob/947ecf9/
      * docs/vnode.md#propertiesstyle-vs-propertiesattributesstyle */
-    if (ctx.vdom) {
+    if (ctx.vdom === true) {
       if (!attributes.attributes) {
         attributes.attributes = {};
       }
@@ -81,7 +87,7 @@ function toH(h, node, ctx) {
       attributes.attributes.style = attributes.style;
       delete attributes.style;
     /* React only accepts `style` as object. */
-    } else if (ctx.react) {
+    } else if (ctx.react === true) {
       attributes.style = parseStyle(attributes.style);
     }
   }
@@ -140,14 +146,14 @@ function addAttribute(props, name, value, ctx) {
   }
 
   /* Treat `true` and truthy known booleans. */
-  if (info.boolean && ctx.hyperscript) {
+  if (info.boolean && ctx.hyperscript === true) {
     value = '';
   }
 
   if (info.name !== 'class' && (info.mustUseAttribute || !info.name)) {
-    if (ctx.vdom) {
+    if (ctx.vdom === true) {
       subprop = 'attributes';
-    } else if (ctx.hyperscript) {
+    } else if (ctx.hyperscript === true) {
       subprop = 'attrs';
     }
 
@@ -170,14 +176,14 @@ function addAttribute(props, name, value, ctx) {
  * `selector`. */
 function react(h) {
   var node = h && h('div');
-  return node && node._store && node.key === null;
+  return Boolean(node && node._store && node.key === null);
 }
 
 /* Check if `h` is `hyperscript`.  It doesn’t accept
  * `class` as an attribute, it must be added through the
  * `selector`. */
 function hyperscript(h) {
-  return h && h.context && h.cleanup;
+  return Boolean(h && h.context && h.cleanup);
 }
 
 /**
