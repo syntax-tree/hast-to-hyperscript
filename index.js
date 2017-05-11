@@ -118,6 +118,7 @@ function toH(h, node, ctx) {
 /* Add `name` and its `value` to `props`. */
 function addAttribute(props, name, value, ctx) {
   var info = information(name) || {};
+  var subprop;
 
   /* Ignore nully, `false`, `NaN`, and falsey known
    * booleans. */
@@ -133,28 +134,32 @@ function addAttribute(props, name, value, ctx) {
 
   name = info.name || paramCase(name);
 
-  if (info.boolean) {
-    /* Treat `true` and truthy known booleans. */
-    value = '';
-  } else if (typeof value === 'object' && 'length' in value) {
+  if (value !== null && typeof value === 'object' && 'length' in value) {
     /* Accept `array`.  Most props are space-separater. */
     value = (info.commaSeparated ? commas : spaces).stringify(value);
   }
 
-  value = String(value || '');
+  /* Treat `true` and truthy known booleans. */
+  if (info.boolean && ctx.hyperscript) {
+    value = '';
+  }
 
-  if (
-    ctx.vdom &&
-    info.name !== 'class' &&
-    (info.mustUseAttribute || !info.name)
-  ) {
-    if (!props.attributes) {
-      props.attributes = {};
+  if (info.name !== 'class' && (info.mustUseAttribute || !info.name)) {
+    if (ctx.vdom) {
+      subprop = 'attributes';
+    } else if (ctx.hyperscript) {
+      subprop = 'attrs';
     }
 
-    props.attributes[name] = value;
+    if (subprop) {
+      if (props[subprop] === undefined) {
+        props[subprop] = {};
+      }
 
-    return;
+      props[subprop][name] = value;
+
+      return;
+    }
   }
 
   props[info.propertyName || name] = value;

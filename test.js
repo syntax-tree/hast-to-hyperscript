@@ -1,15 +1,17 @@
 'use strict';
 
-/* Dependencies. */
 var test = require('tape');
 var u = require('unist-builder');
 var h = require('hyperscript');
 var v = require('virtual-dom/h');
 var r = require('react').createElement;
-var circular = require('circular.js');
-var toH = require('../hast-to-hyperscript/index.js');
+var rehype = require('rehype');
+var vToString = require('vdom-to-html');
+var rToString = require('react-dom/server').renderToStaticMarkup;
+var toH = require('./');
 
-/* Tests. */
+var processor = rehype().data('settings', {fragment: true, position: false});
+
 test('hast-to-hyperscript', function (t) {
   var hast;
 
@@ -56,66 +58,120 @@ test('hast-to-hyperscript', function (t) {
         // Unknown props are dash-cased.
         // Unknown lists are space-separated.
         camelCase: ['on', 'off'],
+        // Data properties.
+        dataSome: 'yes',
+        // ARIA props.
+        ariaValuenow: '1'
+      }
+    }, [u('text', 'charlie')]),
+    u('text', ' delta'),
+    u('element', {
+      tagName: 'input',
+      properties: {
+        type: 'file',
         // Known comma-separated lists:
         accept: ['.jpg', '.jpeg']
       }
-    }, [u('text', 'charlie')]),
-    u('text', ' delta')
+    }, [])
   ]);
 
-  t.deepEqual(
-    clean(toH(h, hast)),
-    clean(h('h1#a.b.c', {hidden: '', height: '2'}, [
+  var doc = [
+    '<h1',
+    ' id="a"',
+    ' class="b c"',
+    ' hidden',
+    ' height="2"',
+    '>bravo ',
+    '<strong',
+    ' style="color:red;"',
+    ' camel-case="on off"',
+    ' data-some="yes"',
+    ' aria-valuenow="1"',
+    '>charlie</strong> ',
+    'delta',
+    '<input type="file" accept=".jpg, .jpeg">',
+    '</h1>'
+  ].join('');
+
+  t.test('should support `hyperscript`', function (st) {
+    var actual = toH(h, hast);
+    var expected = h('h1#a.b.c', {hidden: '', attrs: {height: '2'}}, [
       'bravo ',
       h('strong', {
         style: {color: 'red'},
-        'camel-case': 'on off',
-        accept: '.jpg, .jpeg'
+        'data-some': 'yes',
+        attrs: {
+          'camel-case': 'on off',
+          'aria-valuenow': '1'
+        }
       }, 'charlie'),
-      ' delta'
-    ])),
-    'should support `hyperscript`'
-  );
+      ' delta',
+      h('input', {type: 'file', accept: '.jpg, .jpeg'})
+    ]);
 
-  t.deepEqual(
-    clean(toH(v, hast)),
-    clean(v('h1#a.b.c', {
-      key: 'h-1',
-      attributes: {hidden: '', height: '2'}
-    }, [
+    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output');
+    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline');
+    st.end();
+  });
+
+  t.test('should support `virtual-dom/h`', function (st) {
+    var baseline = doc.replace(/color:red;/, 'color: red');
+    var actual = toH(v, hast);
+    var expected = v('h1#a.b.c', {key: 'h-1', attributes: {hidden: true, height: 2}}, [
       'bravo ',
       v('strong', {
         key: 'h-2',
-        accept: '.jpg, .jpeg',
-        attributes: {style: 'color: red', 'camel-case': 'on off'}
+        attributes: {
+          'aria-valuenow': '1',
+          'camel-case': 'on off',
+          'data-some': 'yes',
+          style: 'color: red'
+        }
       }, 'charlie'),
-      ' delta'
-    ])),
-    'should support `virtual-dom/h`'
-  );
+      ' delta',
+      v('input', {
+        key: 'h-3',
+        type: 'file',
+        accept: '.jpg, .jpeg'
+      })
+    ]);
 
-  t.deepEqual(
-    clean(toH(r, hast)),
-    clean(r(
+    st.deepEqual(html(vToString(actual)), html(baseline), 'equal output');
+    st.deepEqual(html(vToString(expected)), html(baseline), 'equal output baseline');
+    st.end();
+  });
+
+  t.test('should support `React.createElement`', function (st) {
+    var baseline = doc.replace(/ camel-case="on off"/, '');
+    var actual = toH(r, hast);
+    var expected = r(
       'h1',
       {
         key: 'h-1',
         id: 'a',
         className: 'b c',
-        hidden: '',
+        hidden: true,
         height: '2'
       },
       'bravo ',
       r('strong', {
         key: 'h-2',
         style: {color: 'red'},
-        'camel-case': 'on off',
-        accept: '.jpg, .jpeg'
+        'aria-valuenow': '1',
+        'data-some': 'yes'
       }, ['charlie']),
-      ' delta'
-    )),
-    'should support `React.createElement`'
-  );
+      ' delta',
+      r('input', {
+        key: 'h-3',
+        type: 'file',
+        accept: '.jpg, .jpeg'
+      })
+    );
+
+    st.deepEqual(html(rToString(actual)), html(baseline), 'equal output');
+    st.deepEqual(html(rToString(expected)), html(baseline), 'equal output baseline');
+    st.end();
+  });
 
   t.test('should support keys', function (st) {
     st.equal(
@@ -179,7 +235,6 @@ test('hast-to-hyperscript', function (t) {
   t.end();
 });
 
-/** Clean. */
-function clean(node) {
-  return JSON.parse(JSON.stringify(node, circular()));
+function html(doc) {
+  return processor.parse(doc);
 }
