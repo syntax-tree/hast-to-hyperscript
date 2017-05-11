@@ -49,13 +49,13 @@ Transform [HAST][] to something else through a [hyperscript][] DSL.
 
 ###### Parameters
 
-*   `h` ([`Function`][h]);
-*   `node` ([`Element`][element]);
+*   `h` ([`Function`][h])
+*   `node` ([`Element`][element])
 *   `prefix` (`string` or `boolean`, optional)
     — Prefix to use as a prefix for keys passed in `attrs` to `h()`,
     this behaviour is turned off by passing `false`, turned on by passing
     a `string`.  By default, `h-` is used as a prefix if the given `h`
-    is detected as being `virtual-dom/h` or `React.createElement`.
+    is detected as being `virtual-dom/h` or `React.createElement`
 
 ###### Returns
 
@@ -67,10 +67,10 @@ Transform [HAST][] to something else through a hyperscript DSL.
 
 ###### Parameters
 
-*   `name` (`string`) — Tag-name of element to create.
-*   `attrs` (`Object.<string>`) — Attributes to set.
+*   `name` (`string`) — Tag-name of element to create
+*   `attrs` (`Object.<string>`) — Attributes to set
 *   `children` (`Array.<* | string>`) — List of children and text,
-    where children are the result of invoking `h()` previously.
+    where children are the result of invoking `h()` previously
 
 ###### Returns
 
@@ -84,13 +84,13 @@ doesn’t support classes in `attrs`, `virtual-dom/h` needs an `attributes`
 object inside `attrs` most of the time.  `hast-to-hyperscript` works
 around these differences for:
 
-*   [`React.createElement`][react];
-*   [`virtual-dom/h`][vdom];
-*   [`hyperscript`][hyperscript].
+*   [`React.createElement`][react]
+*   [`virtual-dom/h`][vdom]
+*   [`hyperscript`][hyperscript]
 
 ## Related
 
-*   [`hastscript`][hastscript].
+*   [`hastscript`][hastscript]
 
 ## License
 
