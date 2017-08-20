@@ -141,7 +141,10 @@ test('hast-to-hyperscript', function (t) {
     st.end();
   });
 
-  t.test('should support `React.createElement`', function (st) {
+  t.test('should support `React.createElement` in `development`', function (st) {
+    var currentEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+
     var baseline = doc.replace(/ camel-case="on off"/, '');
     var actual = toH(r, hast);
     var expected = r(
@@ -170,6 +173,43 @@ test('hast-to-hyperscript', function (t) {
 
     st.deepEqual(html(rToString(actual)), html(baseline), 'equal output');
     st.deepEqual(html(rToString(expected)), html(baseline), 'equal output baseline');
+    process.env.NODE_ENV = currentEnv;
+    st.end();
+  });
+
+  t.test('should support `React.createElement` in `production`', function (st) {
+    var currentEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+
+    var baseline = doc.replace(/ camel-case="on off"/, '');
+    var actual = toH(r, hast);
+    var expected = r(
+      'h1',
+      {
+        key: 'h-1',
+        id: 'a',
+        className: 'b c',
+        hidden: true,
+        height: '2'
+      },
+      'bravo ',
+      r('strong', {
+        key: 'h-2',
+        style: {color: 'red'},
+        'aria-valuenow': '1',
+        'data-some': 'yes'
+      }, ['charlie']),
+      ' delta',
+      r('input', {
+        key: 'h-3',
+        type: 'file',
+        accept: '.jpg, .jpeg'
+      })
+    );
+
+    st.deepEqual(html(rToString(actual)), html(baseline), 'equal output');
+    st.deepEqual(html(rToString(expected)), html(baseline), 'equal output baseline');
+    process.env.NODE_ENV = currentEnv;
     st.end();
   });
 
