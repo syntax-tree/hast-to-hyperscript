@@ -143,7 +143,7 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support `React.createElement` in `development`', function (st) {
     var currentEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "development";
+    process.env.NODE_ENV = 'development';
 
     var baseline = doc.replace(/ camel-case="on off"/, '');
     var actual = toH(r, hast);
@@ -179,7 +179,7 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support `React.createElement` in `production`', function (st) {
     var currentEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+    process.env.NODE_ENV = 'production';
 
     var baseline = doc.replace(/ camel-case="on off"/, '');
     var actual = toH(r, hast);
