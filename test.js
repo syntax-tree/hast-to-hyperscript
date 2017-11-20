@@ -143,9 +143,9 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support `React.createElement` in `development`', function (st) {
     var currentEnv = process.env.NODE_ENV;
+    var baseline = doc.replace(/color:red;/, 'color:red');
     process.env.NODE_ENV = 'development';
 
-    var baseline = doc.replace(/ camel-case="on off"/, '');
     var actual = toH(r, hast);
     var expected = r(
       'h1',
@@ -154,14 +154,15 @@ test('hast-to-hyperscript', function (t) {
         id: 'a',
         className: 'b c',
         hidden: true,
-        height: '2'
+        height: 2
       },
       'bravo ',
       r('strong', {
         key: 'h-2',
         style: {color: 'red'},
-        'aria-valuenow': '1',
-        'data-some': 'yes'
+        'camel-case': 'on off',
+        'data-some': 'yes',
+        'aria-valuenow': '1'
       }, ['charlie']),
       ' delta',
       r('input', {
@@ -179,9 +180,9 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support `React.createElement` in `production`', function (st) {
     var currentEnv = process.env.NODE_ENV;
+    var baseline = doc.replace(/color:red;/, 'color:red');
     process.env.NODE_ENV = 'production';
 
-    var baseline = doc.replace(/ camel-case="on off"/, '');
     var actual = toH(r, hast);
     var expected = r(
       'h1',
@@ -190,14 +191,15 @@ test('hast-to-hyperscript', function (t) {
         id: 'a',
         className: 'b c',
         hidden: true,
-        height: '2'
+        height: 2
       },
       'bravo ',
       r('strong', {
         key: 'h-2',
         style: {color: 'red'},
-        'aria-valuenow': '1',
-        'data-some': 'yes'
+        'camel-case': 'on off',
+        'data-some': 'yes',
+        'aria-valuenow': '1'
       }, ['charlie']),
       ' delta',
       r('input', {

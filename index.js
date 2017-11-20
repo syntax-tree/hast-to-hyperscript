@@ -111,11 +111,7 @@ function toH(h, node, ctx) {
 
   /* Ensure no React warnings are triggered for
    * void elements having children passed in. */
-  if (elements.length === 0) {
-    elements = undefined;
-  }
-
-  return h(selector, attributes, elements);
+  return elements.length === 0 ? h(selector, attributes) : h(selector, attributes, elements);
 }
 
 /* Add `name` and its `value` to `props`. */
