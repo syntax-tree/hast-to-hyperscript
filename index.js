@@ -142,7 +142,13 @@ function addAttribute(props, name, value, ctx) {
     return;
   }
 
-  name = info.name || paramCase(name);
+  if (info.name) {
+    name = info.name;
+  } else if (ctx.react && !paramCasedReactProp(name)) {
+    name = camelCase(name);
+  } else {
+    name = paramCase(name);
+  }
 
   if (value !== null && typeof value === 'object' && 'length' in value) {
     /* Accept `array`.  Most props are space-separater. */
@@ -221,6 +227,11 @@ function parseStyle(value) {
   }
 
   return result;
+}
+
+function paramCasedReactProp(name) {
+  var head = name.slice(0, 4);
+  return (head === 'data' || head === 'aria') && name.length > 4;
 }
 
 function camelCase(val) {

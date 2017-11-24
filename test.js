@@ -143,7 +143,7 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support `React.createElement` in `development`', function (st) {
     var currentEnv = process.env.NODE_ENV;
-    var baseline = doc.replace(/color:red;/, 'color:red');
+    var baseline = doc.replace(/color:red;/, 'color:red').replace(/camel-case/, 'camelCase');
     process.env.NODE_ENV = 'development';
 
     var actual = toH(r, hast);
@@ -160,7 +160,7 @@ test('hast-to-hyperscript', function (t) {
       r('strong', {
         key: 'h-2',
         style: {color: 'red'},
-        'camel-case': 'on off',
+        camelCase: 'on off',
         'data-some': 'yes',
         'aria-valuenow': '1'
       }, ['charlie']),
@@ -180,7 +180,7 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support `React.createElement` in `production`', function (st) {
     var currentEnv = process.env.NODE_ENV;
-    var baseline = doc.replace(/color:red;/, 'color:red');
+    var baseline = doc.replace(/color:red;/, 'color:red').replace(/camel-case/, 'camelCase');
     process.env.NODE_ENV = 'production';
 
     var actual = toH(r, hast);
@@ -197,7 +197,7 @@ test('hast-to-hyperscript', function (t) {
       r('strong', {
         key: 'h-2',
         style: {color: 'red'},
-        'camel-case': 'on off',
+        camelCase: 'on off',
         'data-some': 'yes',
         'aria-valuenow': '1'
       }, ['charlie']),
@@ -269,6 +269,20 @@ test('hast-to-hyperscript', function (t) {
       toH(r, u('element', {tagName: 'div', properties: {style: '; color; border: 1;'}})).props.style,
       {border: '1'},
       'react: should parse an invalid style declaration'
+    );
+
+    st.deepEqual(
+      toH(r, u('element', {tagName: 'div', properties: {
+        'camel-case': 'on off',
+        'data-some': 'yes',
+        'aria-valuenow': '1'
+      }})).props,
+      {
+        camelCase: 'on off',
+        'data-some': 'yes',
+        'aria-valuenow': '1'
+      },
+      'react: should transform unknown props to camelCase except for data and aria'
     );
 
     st.end();
