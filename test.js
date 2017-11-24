@@ -160,7 +160,7 @@ test('hast-to-hyperscript', function (t) {
       r('strong', {
         key: 'h-2',
         style: {color: 'red'},
-        'camelCase': 'on off',
+        camelCase: 'on off',
         'data-some': 'yes',
         'aria-valuenow': '1'
       }, ['charlie']),
@@ -197,7 +197,7 @@ test('hast-to-hyperscript', function (t) {
       r('strong', {
         key: 'h-2',
         style: {color: 'red'},
-        'camelCase': 'on off',
+        camelCase: 'on off',
         'data-some': 'yes',
         'aria-valuenow': '1'
       }, ['charlie']),
