@@ -271,6 +271,20 @@ test('hast-to-hyperscript', function (t) {
       'react: should parse an invalid style declaration'
     );
 
+    st.deepEqual(
+      toH(r, u('element', {tagName: 'div', properties: {
+        'camel-case': 'on off',
+        'data-some': 'yes',
+        'aria-valuenow': '1'
+      }})).props,
+      {
+        camelCase: 'on off',
+        'data-some': 'yes',
+        'aria-valuenow': '1'
+      },
+      'react: should parse attributeName as camelCase with the exceptions'
+    );
+
     st.end();
   });
 
