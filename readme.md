@@ -78,11 +78,24 @@ Transform [HAST][] to something else through a hyperscript DSL.
 
 ###### Caveats
 
-Although there are lots of libs mentioning support for this interface,
-there are significant differences between them.  For example, hyperscript
-doesn’t support classes in `attrs`, `virtual-dom/h` needs an `attributes`
-object inside `attrs` most of the time.  `hast-to-hyperscript` works
-around these differences for:
+**Nodes**: Most hyperscript implementations only support elements and text (as
+leave nodes).  HAST supports `doctype`, `comment`, and `root` as well.
+
+*   If anything other than an `element` or `root` node is given,
+    `hast-to-hyperscript` throws
+*   If a `root` is given with one element child, that element is
+    transformed
+*   If a `root` with no children, a non-element only child, or more than one
+    children, the children are wrapped in a `div` element
+
+If unknown nodes are found deeper in the tree, they are ignored: only `text`
+and `element` nodes are transformed.
+
+**Support**: Although there are lots of libs mentioning support for this
+interface, there are significant differences between them.  For example,
+hyperscript doesn’t support classes in `attrs`, `virtual-dom/h` needs an
+`attributes` object inside `attrs` most of the time.  `hast-to-hyperscript`
+works around these differences for:
 
 *   [`React.createElement`][react]
 *   [`virtual-dom/h`][vdom]

@@ -18,15 +18,26 @@ function wrapper(h, node, prefix) {
     throw new Error('h is not a function');
   }
 
-  if (!is('element', node)) {
-    throw new Error('Expected element, not `' + node + '`');
-  }
-
   r = react(h);
   v = vdom(h);
 
   if (prefix === null || prefix === undefined) {
     prefix = r === true || v === true ? 'h-' : false;
+  }
+
+  if (is('root', node)) {
+    if (node.children.length === 1 && is('element', node.children[0])) {
+      node = node.children[0];
+    } else {
+      node = {
+        type: 'element',
+        tagName: 'div',
+        properties: {},
+        children: node.children
+      };
+    }
+  } else if (!is('element', node)) {
+    throw new Error('Expected root or element, not `' + ((node && node.type) || node) + '`');
   }
 
   return toH(h, node, {

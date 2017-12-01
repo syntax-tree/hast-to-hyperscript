@@ -28,15 +28,15 @@ test('hast-to-hyperscript', function (t) {
   t.test('should throw if not given a node', function (st) {
     t.throws(function () {
       toH(h);
-    }, /Expected element, not `undefined`/);
+    }, /Expected root or element, not `undefined`/);
 
     t.throws(function () {
-      toH(h, 'text');
-    }, /Error: Expected element, not `text`/);
+      toH(h, u('text', 'Alpha'));
+    }, /Error: Expected root or element, not `text`/);
 
     t.throws(function () {
       toH(h, u('text', 'value'));
-    }, /Expected element/);
+    }, /Expected root or element/);
 
     st.end();
   });
@@ -271,6 +271,49 @@ test('hast-to-hyperscript', function (t) {
       'react: should parse an invalid style declaration'
     );
 
+    st.end();
+  });
+
+  t.test('flattens a `root` with one element child to that child', function (st) {
+    var actual = toH(h, u('root', [u('element', {tagName: 'h1', properties: {id: 'a'}}, [])]));
+    var expected = h('h1#a');
+    var doc = '<h1 id="a"></h1>';
+
+    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output');
+    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline');
+    st.end();
+  });
+
+  t.test('flattens a `root` without children to a `div`', function (st) {
+    var actual = toH(h, u('root', []));
+    var expected = h('div');
+    var doc = '<div></div>';
+
+    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output');
+    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline');
+    st.end();
+  });
+
+  t.test('flattens a `root` with a text child to a `div`', function (st) {
+    var actual = toH(h, u('root', [u('text', 'Alpha')]));
+    var expected = h('div', 'Alpha');
+    var doc = '<div>Alpha</div>';
+
+    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output');
+    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline');
+    st.end();
+  });
+
+  t.test('flattens a `root` with more children to a `div`', function (st) {
+    var actual = toH(h, u('root', [
+      u('element', {tagName: 'h1'}, [u('text', 'Alpha')]),
+      u('element', {tagName: 'p'}, [u('text', 'Bravo')])
+    ]));
+    var expected = h('div', [h('h1', 'Alpha'), h('p', 'Bravo')]);
+    var doc = '<div><h1>Alpha</h1><p>Bravo</p></div>';
+
+    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output');
+    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline');
     st.end();
   });
 
