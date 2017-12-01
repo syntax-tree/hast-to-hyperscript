@@ -7,6 +7,7 @@ var spaces = require('space-separated-tokens');
 var commas = require('comma-separated-tokens');
 var nan = require('is-nan');
 var is = require('unist-util-is');
+var u = require('unist-builder');
 
 module.exports = wrapper;
 
@@ -18,16 +19,24 @@ function wrapper(h, node, prefix) {
     throw new Error('h is not a function');
   }
 
-  if (!is('element', node)) {
-    var name = node && node.type || node;
-    throw new Error('Expected root or element, not `' + name + '`');
-  }
-
   r = react(h);
   v = vdom(h);
 
   if (prefix === null || prefix === undefined) {
     prefix = r === true || v === true ? 'h-' : false;
+  }
+
+  if (is('root', node)) {
+    if (!Array.isArray(node.children) || node.children.length === 0) {
+      throw new Error('Expected children in root');
+    } else if (node.children.length === 1) {
+      node = node.children[0];
+    } else {
+      node = u('element', {tagName: 'div'}, node.children);
+    }
+  } else if (!is('element', node)) {
+    var name = (node && node.type) || node;
+    throw new Error('Expected root or element, not `' + name + '`');
   }
 
   return toH(h, node, {
