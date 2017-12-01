@@ -28,15 +28,23 @@ test('hast-to-hyperscript', function (t) {
   t.test('should throw if not given a node', function (st) {
     t.throws(function () {
       toH(h);
-    }, /Expected element, not `undefined`/);
+    }, /Expected root or element, not `undefined`/);
 
     t.throws(function () {
       toH(h, 'text');
-    }, /Error: Expected element, not `text`/);
+    }, /Error: Expected root or element, not `text`/);
 
     t.throws(function () {
       toH(h, u('text', 'value'));
-    }, /Expected element/);
+    }, /Expected root or element/);
+
+    st.end();
+  });
+
+  t.test('should throw if the root node has 0 children', function (st) {
+    t.throws(function () {
+      toH(h, u('root', {}, []));
+    }, /Expected children in root/);
 
     st.end();
   });
@@ -270,6 +278,40 @@ test('hast-to-hyperscript', function (t) {
       {border: '1'},
       'react: should parse an invalid style declaration'
     );
+
+    st.end();
+  });
+
+  t.test('flattens a `root` element with exactly 1 child', function (st) {
+    const uTree = u('root', {}, [
+      u('element', {
+        tagName: 'h1',
+        properties: {id: 'a'}
+      })
+    ]);
+
+    const vTree = toH(v, uTree);
+    st.equal(vTree.tagName, 'H1');
+    st.ok(vTree.properties);
+    st.equal(vTree.properties.id, 'a');
+
+    st.end();
+  });
+
+  t.test('uses a `div` for a `root` element with >1 children', function (st) {
+    const uTree = u('root', {}, [
+      u('element', {
+        tagName: 'h1',
+        properties: {id: 'a'}
+      }),
+      u('element', {
+        tagName: 'p',
+        properties: {id: 'b'}
+      })
+    ]);
+
+    const vTree = toH(v, uTree);
+    st.equal(vTree.tagName, 'DIV');
 
     st.end();
   });
