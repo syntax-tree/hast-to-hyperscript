@@ -19,7 +19,8 @@ function wrapper(h, node, prefix) {
   }
 
   if (!is('element', node)) {
-    throw new Error('Expected element, not `' + node + '`');
+    var name = node && node.type || node;
+    throw new Error('Expected root or element, not `' + name + '`');
   }
 
   r = react(h);

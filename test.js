@@ -28,15 +28,15 @@ test('hast-to-hyperscript', function (t) {
   t.test('should throw if not given a node', function (st) {
     t.throws(function () {
       toH(h);
-    }, /Expected element, not `undefined`/);
+    }, /Expected root or element, not `undefined`/);
 
     t.throws(function () {
       toH(h, 'text');
-    }, /Error: Expected element, not `text`/);
+    }, /Error: Expected root or element, not `text`/);
 
     t.throws(function () {
       toH(h, u('text', 'value'));
-    }, /Expected element/);
+    }, /Expected root or element/);
 
     st.end();
   });
