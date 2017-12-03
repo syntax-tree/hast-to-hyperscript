@@ -142,7 +142,16 @@ function addAttribute(props, name, value, ctx) {
     return;
   }
 
-  name = info.name || paramCase(name);
+  if (ctx.react) {
+    var beginFour = name.slice(0, 4);
+    if ((beginFour === 'data' || beginFour === 'aria') && name.length > 4) {
+      name = paramCase(name);
+    } else {
+      name = info.name || camelCase(name);
+    }
+  } else {
+    name = info.name || paramCase(name);
+  }
 
   if (value !== null && typeof value === 'object' && 'length' in value) {
     /* Accept `array`.  Most props are space-separater. */
