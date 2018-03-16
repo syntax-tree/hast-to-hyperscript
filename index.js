@@ -210,6 +210,18 @@ function vdom(h) {
 
 function parseStyle(value) {
   var result = {};
+  /* Searches for `url(*)` */
+  var dataUrlRegex = /(url\('.+'\))/gi;
+  var dataUrls = value.match(dataUrlRegex) || [];
+  var urlLength = dataUrls.length;
+  var urlIndex = -1;
+  var url;
+  /* Replace all appearances of `url(*)` with a temporary placeholder used as a dictionary key to the replaced `url(*)` value */
+  while (++urlIndex < urlLength) {
+    url = dataUrls[urlIndex];
+    value = value.replace(url, 'data-url-index-' + urlIndex);
+  }
+
   var declarations = value.split(';');
   var length = declarations.length;
   var index = -1;
@@ -220,6 +232,13 @@ function parseStyle(value) {
   while (++index < length) {
     declaration = declarations[index];
     pos = declaration.indexOf(':');
+    /* Reset and reuse urlIndex */
+    urlIndex = -1;
+    /* Restore all `url(*)` property values previously removed after the style string has been properly split */
+    while (++urlIndex < urlLength) {
+      url = dataUrls[urlIndex];
+      declaration = declaration.replace('data-url-index-' + urlIndex, url);
+    }
     if (pos !== -1) {
       prop = camelCase(trim(declaration.slice(0, pos)));
       result[prop] = trim(declaration.slice(pos + 1));
