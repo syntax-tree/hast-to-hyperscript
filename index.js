@@ -208,22 +208,43 @@ function vdom(h) {
   return false;
 }
 
-function parseStyle(value) {
+function parseStyle(styleStr) {
   var result = {};
-  var declarations = value.split(';');
-  var length = declarations.length;
+  var openParens = 0;
+  var insideString = false;
+  var key = '';
+  var buffer = '';
   var index = -1;
-  var declaration;
-  var prop;
-  var pos;
 
-  while (++index < length) {
-    declaration = declarations[index];
-    pos = declaration.indexOf(':');
-    if (pos !== -1) {
-      prop = camelCase(trim(declaration.slice(0, pos)));
-      result[prop] = trim(declaration.slice(pos + 1));
+  while (++index < styleStr.length) {
+    if (openParens === 0 && !insideString && styleStr[index] === ';') {
+      if (key !== '') {
+        result[camelCase(trim(key))] = trim(buffer);
+        key = '';
+      }
+      buffer = '';
+    } else if (openParens === 0 && !insideString && styleStr[index] === ':') {
+      key = buffer;
+      buffer = '';
+    } else {
+      buffer += styleStr[index];
+      switch (styleStr[index]) {
+        case '(':
+          ++openParens;
+          break;
+        case ')':
+          --openParens;
+          break;
+        case '\'':
+          insideString = !insideString;
+          break;
+        default:
+          // Do nothing
+      }
     }
+  }
+  if (key !== '' && buffer !== '') {
+    result[camelCase(trim(key))] = trim(buffer);
   }
 
   return result;

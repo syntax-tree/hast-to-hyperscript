@@ -272,6 +272,12 @@ test('hast-to-hyperscript', function (t) {
     );
 
     st.deepEqual(
+      toH(r, u('element', {tagName: 'div', properties: {style: 'background-image: url(\'data:image/gif;base64,XXX\'); background: url(data:image/gif;base64,XXX)'}})).props.style,
+      {backgroundImage: 'url(\'data:image/gif;base64,XXX\')', background: 'url(data:image/gif;base64,XXX)'},
+      'react: should parse a style declaration with semicolons inside strings'
+    );
+
+    st.deepEqual(
       toH(r, u('element', {tagName: 'div', properties: {
         'camel-case': 'on off',
         'data-some': 'yes',
