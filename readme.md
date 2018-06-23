@@ -13,26 +13,29 @@ npm install hast-to-hyperscript
 ## Usage
 
 ```javascript
-var toH = require('hast-to-hyperscript');
-var h = require('hyperscript');
+var toH = require('hast-to-hyperscript')
+var h = require('hyperscript')
 
-var tree = { type: 'element',
-   tagName: 'p',
-   properties: { id: 'alpha', className: [ 'bravo' ] },
-   children:
-    [ { type: 'text',
-        value: 'charlie ' },
-      { type: 'element',
-        tagName: 'strong',
-        properties: { style: 'color: red;' },
-        children:
-         [ { type: 'text',
-             value: 'delta' } ] },
-      { type: 'text',
-        value: ' echo.' } ] }
+var tree = {
+  type: 'element',
+  tagName: 'p',
+  properties: {id: 'alpha', className: ['bravo']},
+  children: [
+    {type: 'text', value: 'charlie '},
+    {
+      type: 'element',
+      tagName: 'strong',
+      properties: {style: 'color: red;'},
+      children: [{type: 'text', value: 'delta'}]
+    },
+    {type: 'text', value: ' echo.'}
+  ]
+}
 
 // Transform (`hyperscript` needs `outerHTML` to stringify):
-var doc = toH(h, tree).outerHTML;
+var doc = toH(h, tree).outerHTML
+
+console.log(doc)
 ```
 
 Yields:

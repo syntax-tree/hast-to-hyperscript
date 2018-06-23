@@ -38,6 +38,7 @@
     "esmangle": "^1.0.0",
     "hyperscript": "^2.0.2",
     "nyc": "^12.0.0",
+    "prettier": "^1.13.5",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
     "rehype": "^5.0.0",
@@ -50,14 +51,13 @@
     "xo": "^0.21.0"
   },
   "scripts": {
-    "build-md": "remark . -qfo",
+    "format": "remark . -qfo && prettier --write '**/*.js' && xo --fix",
     "build-bundle": "browserify index.js --bare -s hast-to-hyperscript > hast-to-hyperscript.js",
     "build-mangle": "esmangle hast-to-hyperscript.js > hast-to-hyperscript.min.js",
-    "build": "npm run build-md && npm run build-bundle && npm run build-mangle",
-    "lint": "xo",
+    "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test.js",
-    "test": "npm run build && npm run lint && npm run test-coverage"
+    "test": "npm run format && npm run build && npm run test-coverage"
   },
   "nyc": {
     "check-coverage": true,
@@ -65,11 +65,20 @@
     "functions": 100,
     "branches": 100
   },
+  "prettier": {
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "semi": false,
+    "trailingComma": "none"
+  },
   "xo": {
-    "space": true,
+    "prettier": true,
     "esnext": false,
     "rules": {
       "unicorn/prefer-type-error": "off",
+      "complexity": "off",
       "guard-for-in": "off"
     }
   },
