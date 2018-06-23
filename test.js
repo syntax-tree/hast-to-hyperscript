@@ -8,7 +8,7 @@ var r = require('react').createElement;
 var rehype = require('rehype');
 var vToString = require('vdom-to-html');
 var rToString = require('react-dom/server').renderToStaticMarkup;
-var toH = require('./');
+var toH = require('.');
 
 var processor = rehype().data('settings', {fragment: true, position: false});
 
