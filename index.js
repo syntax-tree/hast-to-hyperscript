@@ -5,11 +5,11 @@ var svg = require('property-information/svg')
 var find = require('property-information/find')
 var spaces = require('space-separated-tokens')
 var commas = require('comma-separated-tokens')
+var style = require('style-to-object')
 var ns = require('web-namespaces')
 var is = require('unist-util-is')
 
 var dashes = /-([a-z])/g
-var ws = /^\s*|\s*$/g
 
 module.exports = wrapper
 
@@ -80,13 +80,13 @@ function toH(h, node, ctx) {
   var value
   var result
 
-  if (parentSchema.space === 'html' && lower(name) === 'svg') {
+  if (parentSchema.space === 'html' && name.toLowerCase() === 'svg') {
     schema = svg
     ctx.schema = schema
   }
 
   if (ctx.vdom === true && schema.space === 'html') {
-    name = upper(name)
+    name = name.toUpperCase()
   }
 
   properties = node.properties
@@ -101,7 +101,7 @@ function toH(h, node, ctx) {
     (ctx.vdom === true || ctx.react === true)
   ) {
     // VDOM and React accept `style` as object.
-    attributes.style = parseStyle(attributes.style)
+    attributes.style = parseStyle(attributes.style, name)
   }
 
   if (ctx.prefix) {
@@ -202,25 +202,21 @@ function vdom(h) {
   return h && h('div').type === 'VirtualNode'
 }
 
-function parseStyle(value) {
+function parseStyle(value, tagName) {
   var result = {}
-  var declarations = value.split(';')
-  var length = declarations.length
-  var index = -1
-  var declaration
-  var prop
-  var pos
 
-  while (++index < length) {
-    declaration = declarations[index]
-    pos = declaration.indexOf(':')
-    if (pos !== -1) {
-      prop = styleCase(trim(declaration.slice(0, pos)))
-      result[prop] = trim(declaration.slice(pos + 1))
-    }
+  try {
+    style(value, iterator)
+  } catch (err) {
+    err.message = tagName + '[style]' + err.message.slice('undefined'.length)
+    throw err
   }
 
   return result
+
+  function iterator(name, value) {
+    result[styleCase(name)] = value
+  }
 }
 
 function styleCase(val) {
@@ -232,17 +228,5 @@ function styleCase(val) {
 }
 
 function styleReplacer($0, $1) {
-  return upper($1)
-}
-
-function lower(value) {
-  return value.toLowerCase()
-}
-
-function upper(value) {
-  return value.toUpperCase()
-}
-
-function trim(value) {
-  return value.replace(ws, '')
+  return $1.toUpperCase()
 }

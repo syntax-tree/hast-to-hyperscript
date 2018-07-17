@@ -441,16 +441,18 @@ test('hast-to-hyperscript', function(t) {
       'react: should parse vendor prefixed in style declarations'
     )
 
-    st.deepEqual(
-      toH(
-        r,
-        u('element', {
-          tagName: 'div',
-          properties: {style: '; color; border: 1;'}
-        })
-      ).props.style,
-      {border: '1'},
-      'react: should parse an invalid style declaration'
+    st.throws(
+      function() {
+        toH(
+          r,
+          u('element', {
+            tagName: 'div',
+            properties: {style: '; color; border: 1;'}
+          })
+        )
+      },
+      /^Error: div\[style]:1:3: missing '\}'$/,
+      'react: should throw on invalid style declarations'
     )
 
     st.deepEqual(
