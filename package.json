@@ -26,10 +26,8 @@
   ],
   "dependencies": {
     "comma-separated-tokens": "^1.0.0",
-    "is-nan": "^1.2.1",
     "property-information": "^4.0.0",
     "space-separated-tokens": "^1.0.0",
-    "trim": "0.0.1",
     "unist-util-is": "^2.0.0",
     "web-namespaces": "^1.1.2"
   },
@@ -78,8 +76,8 @@
     "esnext": false,
     "rules": {
       "unicorn/prefer-type-error": "off",
-      "complexity": "off",
-      "guard-for-in": "off"
+      "guard-for-in": "off",
+      "no-self-compare": "off"
     }
   },
   "remarkConfig": {

@@ -1,16 +1,15 @@
 'use strict'
 
-var trim = require('trim')
 var html = require('property-information/html')
 var svg = require('property-information/svg')
 var find = require('property-information/find')
 var spaces = require('space-separated-tokens')
 var commas = require('comma-separated-tokens')
-var nan = require('is-nan')
 var ns = require('web-namespaces')
 var is = require('unist-util-is')
 
 var dashes = /-([a-z])/g
+var ws = /^\s*|\s*$/g
 
 module.exports = wrapper
 
@@ -150,7 +149,7 @@ function addAttribute(props, prop, value, ctx) {
     value === null ||
     value === undefined ||
     value === false ||
-    nan(value) ||
+    value !== value ||
     (info.boolean && !value)
   ) {
     return
@@ -242,4 +241,8 @@ function lower(value) {
 
 function upper(value) {
   return value.toUpperCase()
+}
+
+function trim(value) {
+  return value.replace(ws, '')
 }
