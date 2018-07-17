@@ -1,9 +1,11 @@
 'use strict'
 
 var test = require('tape')
+var namespaces = require('web-namespaces')
 var u = require('unist-builder')
 var h = require('hyperscript')
 var v = require('virtual-dom/h')
+var vs = require('virtual-dom/virtual-hyperscript/svg')
 var r = require('react').createElement
 var rehype = require('rehype')
 var vToString = require('vdom-to-html')
@@ -41,53 +43,77 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  hast = u(
-    'element',
-    {
-      tagName: 'h1',
-      properties: {id: 'a', className: ['b', 'c'], hidden: true, height: 2}
-    },
-    [
-      u('text', 'bravo '),
-      u('comment', 'Hello!'),
-      u(
-        'element',
-        {
-          tagName: 'strong',
-          properties: {
-            style: 'color: red',
-            // Unknown booleans are ignored.
-            ignored: false,
-            // Falsey known booleans are ignore.
-            disabled: 0,
-            // Unknown props are dash-cased.
-            // Unknown lists are space-separated.
-            camelCase: ['on', 'off'],
-            // Data properties.
-            dataSome: 'yes',
-            // ARIA props.
-            ariaValuenow: '1'
-          }
-        },
-        [u('text', 'charlie')]
-      ),
-      u('text', ' delta'),
-      u(
-        'element',
-        {
-          tagName: 'input',
-          properties: {
-            type: 'file',
-            // Known comma-separated lists:
-            accept: ['.jpg', '.jpeg']
-          }
-        },
-        []
-      )
-    ]
-  )
+  hast = u('root', [
+    u(
+      'element',
+      {
+        tagName: 'h1',
+        properties: {id: 'a', className: ['b', 'c'], hidden: true, height: 2}
+      },
+      [
+        u('text', 'bravo '),
+        u('comment', 'Hello!'),
+        u(
+          'element',
+          {
+            tagName: 'strong',
+            properties: {
+              style: 'color: red',
+              // Unknown booleans are ignored.
+              ignored: false,
+              // Falsey known booleans are ignored.
+              disabled: 0,
+              // Unknown props are left as-is.
+              foo: 'bar',
+              // Unknown lists are space-separated.
+              camelCase: ['on', 'off'],
+              // Data properties.
+              dataSome: 'yes',
+              // Numeric-start data properties.
+              data123: '456',
+              // ARIA props.
+              ariaValuenow: '1'
+            }
+          },
+          [u('text', 'charlie')]
+        ),
+        u('text', ' delta'),
+        u(
+          'element',
+          {
+            tagName: 'input',
+            properties: {
+              checked: true,
+              type: 'file',
+              // Known comma-separated lists:
+              accept: ['.jpg', '.jpeg']
+            }
+          },
+          []
+        )
+      ]
+    ),
+    u(
+      'element',
+      {
+        tagName: 'svg',
+        properties: {
+          xmlns: 'http://www.w3.org/2000/svg',
+          viewBox: [0, 0, 500, 500]
+        }
+      },
+      [
+        u(
+          'element',
+          {tagName: 'circle', properties: {cx: 120, cy: 120, r: 100}},
+          []
+        )
+      ]
+    )
+  ])
 
   var doc = [
+    '<div>',
     '<h1',
     ' id="a"',
     ' class="b c"',
@@ -96,169 +122,262 @@ test('hast-to-hyperscript', function(t) {
     '>bravo ',
     '<strong',
     ' style="color:red;"',
-    ' camel-case="on off"',
+    ' foo="bar"',
+    ' camelCase="on off"',
+    ' data-123="456"',
     ' data-some="yes"',
     ' aria-valuenow="1"',
     '>charlie</strong> ',
     'delta',
-    '<input type="file" accept=".jpg, .jpeg">',
-    '</h1>'
+    '<input checked type="file" accept=".jpg, .jpeg">',
+    '</h1>',
+    '<svg',
+    ' xmlns="http://www.w3.org/2000/svg"',
+    ' viewBox="0 0 500 500"',
+    '>',
+    '<circle',
+    ' cx="120"',
+    ' cy="120"',
+    ' r="100"',
+    '>',
+    '</circle>',
+    '</svg>',
+    '</div>'
   ].join('')
 
   t.test('should support `hyperscript`', function(st) {
+    // `hyperscript` does not support SVG (camelcased props).
+    var baseline = doc.replace(/viewBox/, 'viewbox')
     var actual = toH(h, hast)
-    var expected = h('h1#a.b.c', {hidden: '', attrs: {height: '2'}}, [
-      'bravo ',
+    var expected = h('div', [
+      h('h1#a.b.c', {hidden: '', attrs: {height: '2'}}, [
+        'bravo ',
+        h(
+          'strong',
+          {
+            style: {color: 'red'},
+            'data-123': '456',
+            'data-some': 'yes',
+            attrs: {foo: 'bar', camelCase: 'on off', 'aria-valuenow': '1'}
+          },
+          'charlie'
+        ),
+        ' delta',
+        h('input', {checked: '', attrs: {type: 'file', accept: '.jpg, .jpeg'}})
+      ]),
       h(
-        'strong',
-        {
-          style: {color: 'red'},
-          'data-some': 'yes',
-          attrs: {
-            'camel-case': 'on off',
-            'aria-valuenow': '1'
-          }
-        },
-        'charlie'
-      ),
-      ' delta',
-      h('input', {type: 'file', accept: '.jpg, .jpeg'})
+        'svg',
+        {attrs: {xmlns: 'http://www.w3.org/2000/svg', viewbox: '0 0 500 500'}},
+        h('circle', {attrs: {cx: 120, cy: 120, r: 100}}, [])
+      )
     ])
 
-    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
+    st.deepEqual(html(actual.outerHTML), html(baseline), 'equal output')
+
+    st.deepEqual(
+      html(expected.outerHTML),
+      html(baseline),
+      'equal output baseline'
+    )
+
     st.end()
   })
 
   t.test('should support `virtual-dom/h`', function(st) {
     var baseline = doc.replace(/color:red;/, 'color: red')
     var actual = toH(v, hast)
-    var expected = v(
-      'h1#a.b.c',
-      {key: 'h-1', attributes: {hidden: true, height: 2}},
-      [
-        'bravo ',
-        v(
-          'strong',
-          {
-            key: 'h-2',
-            attributes: {
-              'aria-valuenow': '1',
-              'camel-case': 'on off',
-              'data-some': 'yes',
-              style: 'color: red'
-            }
-          },
-          'charlie'
-        ),
-        ' delta',
-        v('input', {
-          key: 'h-3',
-          type: 'file',
-          accept: '.jpg, .jpeg'
-        })
-      ]
-    )
+    var expected = v('div', {key: 'h-1'}, [
+      v(
+        'h1',
+        {
+          key: 'h-2',
+          attributes: {id: 'a', class: 'b c', hidden: true, height: 2}
+        },
+        [
+          'bravo ',
+          v(
+            'strong',
+            {
+              key: 'h-3',
+              attributes: {
+                'aria-valuenow': '1',
+                foo: 'bar',
+                camelCase: 'on off',
+                'data-123': '456',
+                'data-some': 'yes',
+                style: 'color: red'
+              }
+            },
+            'charlie'
+          ),
+          ' delta',
+          v('input', {
+            key: 'h-4',
+            checked: true,
+            attributes: {type: 'file', accept: '.jpg, .jpeg'}
+          })
+        ]
+      ),
+      vs(
+        'svg',
+        {
+          key: 'h-5',
+          namespace: namespaces.svg,
+          attributes: {
+            xmlns: 'http://www.w3.org/2000/svg',
+            viewBox: '0 0 500 500'
+          }
+        },
+        [
+          vs('circle', {
+            key: 'h-6',
+            namespace: namespaces.svg,
+            attributes: {cx: 120, cy: 120, r: 100}
+          })
+        ]
+      )
+    ])
+
+    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
 
     st.deepEqual(html(vToString(actual)), html(baseline), 'equal output')
+
     st.deepEqual(
       html(vToString(expected)),
       html(baseline),
       'equal output baseline'
     )
+
     st.end()
   })
 
   t.test('should support `React.createElement` in `development`', function(st) {
     var currentEnv = process.env.NODE_ENV
-    var baseline = doc
-      .replace(/color:red;/, 'color:red')
-      .replace(/camel-case/, 'camelCase')
+    var baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'development'
 
     var actual = toH(r, hast)
     var expected = r(
-      'h1',
-      {
-        key: 'h-1',
-        id: 'a',
-        className: 'b c',
-        hidden: true,
-        height: 2
-      },
-      'bravo ',
+      'div',
+      {key: 'h-1'},
       r(
-        'strong',
+        'h1',
         {
           key: 'h-2',
-          style: {color: 'red'},
-          camelCase: 'on off',
-          'data-some': 'yes',
-          'aria-valuenow': '1'
+          id: 'a',
+          className: 'b c',
+          hidden: true,
+          height: 2
         },
-        ['charlie']
+        'bravo ',
+        r(
+          'strong',
+          {
+            key: 'h-3',
+            style: {color: 'red'},
+            foo: 'bar',
+            camelCase: 'on off',
+            'data-123': '456',
+            'data-some': 'yes',
+            'aria-valuenow': '1'
+          },
+          ['charlie']
+        ),
+        ' delta',
+        r('input', {
+          key: 'h-4',
+          checked: true,
+          type: 'file',
+          accept: '.jpg, .jpeg'
+        })
       ),
-      ' delta',
-      r('input', {
-        key: 'h-3',
-        type: 'file',
-        accept: '.jpg, .jpeg'
-      })
+      r(
+        'svg',
+        {
+          key: 'h-5',
+          xmlns: 'http://www.w3.org/2000/svg',
+          viewBox: '0 0 500 500'
+        },
+        [r('circle', {key: 'h-6', cx: 120, cy: 120, r: 100})]
+      )
     )
 
+    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
+
     st.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
+
     st.deepEqual(
       html(rToString(expected)),
       html(baseline),
       'equal output baseline'
     )
+
     process.env.NODE_ENV = currentEnv
+
     st.end()
   })
 
   t.test('should support `React.createElement` in `production`', function(st) {
     var currentEnv = process.env.NODE_ENV
-    var baseline = doc
-      .replace(/color:red;/, 'color:red')
-      .replace(/camel-case/, 'camelCase')
+    var baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'production'
 
     var actual = toH(r, hast)
     var expected = r(
-      'h1',
-      {
-        key: 'h-1',
-        id: 'a',
-        className: 'b c',
-        hidden: true,
-        height: 2
-      },
-      'bravo ',
+      'div',
+      {key: 'h-1'},
       r(
-        'strong',
+        'h1',
         {
           key: 'h-2',
-          style: {color: 'red'},
-          camelCase: 'on off',
-          'data-some': 'yes',
-          'aria-valuenow': '1'
+          id: 'a',
+          className: 'b c',
+          hidden: true,
+          height: 2
         },
-        ['charlie']
+        'bravo ',
+        r(
+          'strong',
+          {
+            key: 'h-3',
+            style: {color: 'red'},
+            foo: 'bar',
+            camelCase: 'on off',
+            'data-123': '456',
+            'data-some': 'yes',
+            'aria-valuenow': '1'
+          },
+          ['charlie']
+        ),
+        ' delta',
+        r('input', {
+          key: 'h-4',
+          checked: true,
+          type: 'file',
+          accept: '.jpg, .jpeg'
+        })
       ),
-      ' delta',
-      r('input', {
-        key: 'h-3',
-        type: 'file',
-        accept: '.jpg, .jpeg'
-      })
+      r(
+        'svg',
+        {
+          key: 'h-5',
+          xmlns: 'http://www.w3.org/2000/svg',
+          viewBox: '0 0 500 500'
+        },
+        [r('circle', {key: 'h-6', cx: 120, cy: 120, r: 100})]
+      )
     )
 
+    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
+
     st.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
+
     st.deepEqual(
       html(rToString(expected)),
       html(baseline),
       'equal output baseline'
     )
+
     process.env.NODE_ENV = currentEnv
     st.end()
   })
@@ -340,18 +459,44 @@ test('hast-to-hyperscript', function(t) {
         u('element', {
           tagName: 'div',
           properties: {
-            'camel-case': 'on off',
+            foo: 'bar',
+            camelCase: 'on off',
+            'data-123': '456',
             'data-some': 'yes',
             'aria-valuenow': '1'
           }
         })
       ).props,
       {
+        foo: 'bar',
         camelCase: 'on off',
+        'data-123': '456',
         'data-some': 'yes',
         'aria-valuenow': '1'
       },
       'react: should transform unknown props to camelCase except for data and aria'
+    )
+
+    st.end()
+  })
+
+  t.test('should support space', function(st) {
+    st.equal(
+      toH(v, u('element', {tagName: 'div'})).namespace,
+      null,
+      'should start in HTML'
+    )
+
+    st.equal(
+      toH(v, u('element', {tagName: 'div'}), {space: 'svg'}).namespace,
+      namespaces.svg,
+      'should support `space: "svg"`'
+    )
+
+    st.equal(
+      toH(v, u('element', {tagName: 'svg'})).namespace,
+      namespaces.svg,
+      'should infer `space: "svg"`'
     )
 
     st.end()
@@ -413,4 +558,8 @@ test('hast-to-hyperscript', function(t) {
 
 function html(doc) {
   return processor.parse(doc)
+}
+
+function json(value) {
+  return JSON.parse(JSON.stringify(value))
 }

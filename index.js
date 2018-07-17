@@ -1,21 +1,34 @@
 'use strict'
 
 var trim = require('trim')
-var paramCase = require('kebab-case')
-var information = require('property-information')
+var html = require('property-information/html')
+var svg = require('property-information/svg')
+var find = require('property-information/find')
 var spaces = require('space-separated-tokens')
 var commas = require('comma-separated-tokens')
 var nan = require('is-nan')
+var ns = require('web-namespaces')
 var is = require('unist-util-is')
+
+var dashes = /-([a-z])/g
 
 module.exports = wrapper
 
-function wrapper(h, node, prefix) {
+function wrapper(h, node, options) {
+  var settings = options || {}
+  var prefix
   var r
   var v
 
   if (typeof h !== 'function') {
     throw new Error('h is not a function')
+  }
+
+  if (typeof settings === 'string' || typeof settings === 'boolean') {
+    prefix = settings
+    settings = {}
+  } else {
+    prefix = settings.prefix
   }
 
   r = react(h)
@@ -43,6 +56,7 @@ function wrapper(h, node, prefix) {
   }
 
   return toH(h, node, {
+    schema: settings.space === 'svg' ? svg : html,
     prefix: prefix,
     key: 0,
     react: r,
@@ -51,10 +65,12 @@ function wrapper(h, node, prefix) {
   })
 }
 
-/* Transform a HAST node through a hyperscript interface
- * to *anything*! */
+// Transform a HAST node through a hyperscript interface
+// to *anything*!
 function toH(h, node, ctx) {
-  var selector = node.tagName
+  var parentSchema = ctx.schema
+  var schema = parentSchema
+  var name = node.tagName
   var properties
   var attributes
   var children
@@ -63,6 +79,16 @@ function toH(h, node, ctx) {
   var length
   var index
   var value
+  var result
+
+  if (parentSchema.space === 'html' && lower(name) === 'svg') {
+    schema = svg
+    ctx.schema = schema
+  }
+
+  if (ctx.vdom === true && schema.space === 'html') {
+    name = upper(name)
+  }
 
   properties = node.properties
   attributes = {}
@@ -71,35 +97,12 @@ function toH(h, node, ctx) {
     addAttribute(attributes, property, properties[property], ctx)
   }
 
-  if (ctx.vdom === true) {
-    selector = selector.toUpperCase()
-  }
-
-  if (ctx.hyperscript === true && attributes.id) {
-    selector += '#' + attributes.id
-    delete attributes.id
-  }
-
-  if ((ctx.hyperscript === true || ctx.vdom === true) && attributes.className) {
-    selector += '.' + spaces.parse(attributes.className).join('.')
-    delete attributes.className
-  }
-
-  if (typeof attributes.style === 'string') {
-    /* VDOM expects a `string` style in `attributes`
-     * See https://github.com/Matt-Esch/virtual-dom/blob/947ecf9/
-     * docs/vnode.md#propertiesstyle-vs-propertiesattributesstyle */
-    if (ctx.vdom === true) {
-      if (!attributes.attributes) {
-        attributes.attributes = {}
-      }
-
-      attributes.attributes.style = attributes.style
-      delete attributes.style
-      /* React only accepts `style` as object. */
-    } else if (ctx.react === true) {
-      attributes.style = parseStyle(attributes.style)
-    }
+  if (
+    typeof attributes.style === 'string' &&
+    (ctx.vdom === true || ctx.react === true)
+  ) {
+    // VDOM and React accept `style` as object.
+    attributes.style = parseStyle(attributes.style)
   }
 
   if (ctx.prefix) {
@@ -107,9 +110,13 @@ function toH(h, node, ctx) {
     attributes.key = ctx.prefix + ctx.key
   }
 
+  if (ctx.vdom && schema.space !== 'html') {
+    attributes.namespace = ns[schema.space]
+  }
+
   elements = []
-  children = node.children || []
-  length = children.length
+  children = node.children
+  length = children ? children.length : 0
   index = -1
 
   while (++index < length) {
@@ -122,20 +129,23 @@ function toH(h, node, ctx) {
     }
   }
 
-  /* Ensure no React warnings are triggered for
-   * void elements having children passed in. */
-  return elements.length === 0
-    ? h(selector, attributes)
-    : h(selector, attributes, elements)
+  // Ensure no React warnings are triggered for
+  // void elements having children passed in.
+  result =
+    elements.length === 0 ? h(name, attributes) : h(name, attributes, elements)
+
+  // Restore parent schema.
+  ctx.schema = parentSchema
+
+  return result
 }
 
-/* Add `name` and its `value` to `props`. */
-function addAttribute(props, name, value, ctx) {
-  var info = information(name) || {}
+function addAttribute(props, prop, value, ctx) {
+  var schema = ctx.schema
+  var info = find(schema, prop)
   var subprop
 
-  /* Ignore nully, `false`, `NaN`, and falsey known
-   * booleans. */
+  // Ignore nully, `false`, `NaN`, and falsey known booleans.
   if (
     value === null ||
     value === undefined ||
@@ -146,48 +156,36 @@ function addAttribute(props, name, value, ctx) {
     return
   }
 
-  if (info.name) {
-    name = info.name
-  } else if (ctx.react && !paramCasedReactProp(name)) {
-    name = camelCase(name)
-  } else {
-    name = paramCase(name)
-  }
-
   if (value !== null && typeof value === 'object' && 'length' in value) {
-    /* Accept `array`.  Most props are space-separater. */
+    // Accept `array`.  Most props are space-separater.
     value = (info.commaSeparated ? commas : spaces).stringify(value)
   }
 
-  /* Treat `true` and truthy known booleans. */
+  // Treat `true` and truthy known booleans.
   if (info.boolean && ctx.hyperscript === true) {
     value = ''
   }
 
-  if (info.name !== 'class' && (info.mustUseAttribute || !info.name)) {
+  if (!info.mustUseProperty) {
     if (ctx.vdom === true) {
       subprop = 'attributes'
     } else if (ctx.hyperscript === true) {
       subprop = 'attrs'
     }
-
-    if (subprop) {
-      if (props[subprop] === undefined) {
-        props[subprop] = {}
-      }
-
-      props[subprop][name] = value
-
-      return
-    }
   }
 
-  props[info.propertyName || name] = value
+  if (subprop) {
+    if (props[subprop] === undefined) {
+      props[subprop] = {}
+    }
+
+    props[subprop][info.attribute] = value
+  } else {
+    props[ctx.react && info.space ? info.property : info.attribute] = value
+  }
 }
 
-/* Check if `h` is `react.createElement`.  It doesn’t accept
- * `class` as an attribute, it must be added through the
- * `selector`. */
+// Check if `h` is `react.createElement`.
 function react(h) {
   var node = h && h('div')
   return Boolean(
@@ -195,24 +193,14 @@ function react(h) {
   )
 }
 
-/* Check if `h` is `hyperscript`.  It doesn’t accept
- * `class` as an attribute, it must be added through the
- * `selector`. */
+// Check if `h` is `hyperscript`.
 function hyperscript(h) {
   return Boolean(h && h.context && h.cleanup)
 }
 
-/* Check if `h` is `virtual-dom/h`.  It’s the only
- * hyperscript “compatible” interface needing `attributes`. */
+// Check if `h` is `virtual-dom/h`.
 function vdom(h) {
-  try {
-    return h('div').type === 'VirtualNode'
-  } catch (err) {
-    /* Empty */
-  }
-
-  /* istanbul ignore next */
-  return false
+  return h && h('div').type === 'VirtualNode'
 }
 
 function parseStyle(value) {
@@ -228,7 +216,7 @@ function parseStyle(value) {
     declaration = declarations[index]
     pos = declaration.indexOf(':')
     if (pos !== -1) {
-      prop = camelCase(trim(declaration.slice(0, pos)))
+      prop = styleCase(trim(declaration.slice(0, pos)))
       result[prop] = trim(declaration.slice(pos + 1))
     }
   }
@@ -236,19 +224,22 @@ function parseStyle(value) {
   return result
 }
 
-function paramCasedReactProp(name) {
-  var head = name.slice(0, 4)
-  return (head === 'data' || head === 'aria') && name.length > 4
-}
-
-function camelCase(val) {
+function styleCase(val) {
   if (val.slice(0, 4) === '-ms-') {
     val = 'ms-' + val.slice(4)
   }
 
-  return val.replace(/-([a-z])/g, replace)
+  return val.replace(dashes, styleReplacer)
 }
 
-function replace($0, $1) {
-  return $1.toUpperCase()
+function styleReplacer($0, $1) {
+  return upper($1)
+}
+
+function lower(value) {
+  return value.toLowerCase()
+}
+
+function upper(value) {
+  return value.toUpperCase()
 }

@@ -46,7 +46,7 @@ Yields:
 
 ## API
 
-### `toH(h, node[, prefix])`
+### `toH(h, node[, options|prefix])`
 
 Transform [HAST][] to something else through a [hyperscript][] DSL.
 
@@ -54,11 +54,17 @@ Transform [HAST][] to something else through a [hyperscript][] DSL.
 
 *   `h` ([`Function`][h])
 *   `node` ([`Element`][element])
-*   `prefix` (`string` or `boolean`, optional)
+*   `prefix` — Treated as `{prefix: prefix}`
+*   `options.prefix` (`string` or `boolean`, optional)
     — Prefix to use as a prefix for keys passed in `attrs` to `h()`,
     this behaviour is turned off by passing `false`, turned on by passing
     a `string`.  By default, `h-` is used as a prefix if the given `h`
     is detected as being `virtual-dom/h` or `React.createElement`
+*   `options.space` (enum, `'svg'` or `'html'`, default: `'html'`)
+    — Whether `node` is in the `'html'` or `'svg'` space.
+    If an `svg` element is found when inside the HTML space, `toH` automatically
+    switches to the SVG space when entering the element, and switches back when
+    leaving
 
 ###### Returns
 
