@@ -33,7 +33,6 @@
   },
   "devDependencies": {
     "browserify": "^16.0.0",
-    "esmangle": "^1.0.0",
     "hyperscript": "^2.0.2",
     "nyc": "^12.0.0",
     "prettier": "^1.13.5",
@@ -43,6 +42,7 @@
     "remark-cli": "^5.0.0",
     "remark-preset-wooorm": "^4.0.0",
     "tape": "^4.0.0",
+    "tinyify": "^2.4.3",
     "unist-builder": "^1.0.1",
     "vdom-to-html": "^2.3.1",
     "virtual-dom": "^2.1.1",
@@ -50,8 +50,8 @@
   },
   "scripts": {
     "format": "remark . -qfo && prettier --write '**/*.js' && xo --fix",
-    "build-bundle": "browserify index.js --bare -s hast-to-hyperscript > hast-to-hyperscript.js",
-    "build-mangle": "esmangle hast-to-hyperscript.js > hast-to-hyperscript.min.js",
+    "build-bundle": "browserify index.js -s hastToHyperscript > hast-to-hyperscript.js",
+    "build-mangle": "browserify index.js -p tinyify -s hastToHyperscript > hast-to-hyperscript.min.js",
     "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test.js",
