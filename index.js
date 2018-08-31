@@ -18,6 +18,7 @@ function wrapper(h, node, options) {
   var prefix
   var r
   var v
+  var vu
 
   if (typeof h !== 'function') {
     throw new Error('h is not a function')
@@ -32,6 +33,7 @@ function wrapper(h, node, options) {
 
   r = react(h)
   v = vdom(h)
+  vu = vue(h)
 
   if (prefix === null || prefix === undefined) {
     prefix = r === true || v === true ? 'h-' : false
@@ -60,6 +62,7 @@ function wrapper(h, node, options) {
     key: 0,
     react: r,
     vdom: v,
+    vue: vu,
     hyperscript: hyperscript(h)
   })
 }
@@ -190,6 +193,11 @@ function react(h) {
   return Boolean(
     node && ('_owner' in node || '_store' in node) && node.key === null
   )
+}
+
+// Check if `h` is vue `createElement`.
+function vue(h) {
+  return h && h('div')._isVue === true
 }
 
 // Check if `h` is `hyperscript`.
