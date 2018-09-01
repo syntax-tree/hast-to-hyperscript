@@ -101,9 +101,9 @@ function toH(h, node, ctx) {
 
   if (
     typeof attributes.style === 'string' &&
-    (ctx.vdom === true || ctx.react === true)
+    (ctx.vdom === true || ctx.react === true || ctx.vue === true)
   ) {
-    // VDOM and React accept `style` as object.
+    // VDOM, React and Vue accept `style` as object.
     attributes.style = parseStyle(attributes.style, name)
   }
 
@@ -173,6 +173,10 @@ function addAttribute(props, prop, value, ctx) {
       subprop = 'attributes'
     } else if (ctx.hyperscript === true) {
       subprop = 'attrs'
+    } else if (ctx.vue === true) {
+      if (info.property && info.property !== 'style') {
+        subprop = 'attrs'
+      }
     }
   }
 
