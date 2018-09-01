@@ -197,7 +197,11 @@ function react(h) {
 
 // Check if `h` is vue `createElement`.
 function vue(h) {
-  return h && h('div')._isVue === true
+  if (typeof h === 'undefined') {
+    return
+  }
+  var div = h('div')
+  return div && div.context && div.context._isVue === true
 }
 
 // Check if `h` is `hyperscript`.
