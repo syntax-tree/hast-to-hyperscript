@@ -278,10 +278,7 @@ function react(h) {
 
 // Check if `h` is vue `createElement`.
 function vue(h) {
-  if (typeof h === 'undefined') {
-    return
-  }
-  var div = h('div')
+  var div = h && h('div')
   return div && div.context && div.context._isVue === true
 }
 
