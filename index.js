@@ -11,6 +11,22 @@ var is = require('unist-util-is')
 
 var dashes = /-([a-z])/g
 
+var vueUtils = {
+  isTopLevel: makeMap([
+    'class',
+    'staticClass',
+    'style',
+    'key',
+    'ref',
+    'refInFor',
+    'slot',
+    'scopedSlots'
+  ]),
+  nestableRE: /^(props|domProps|on|nativeOn|hook)([\-_A-Z])/,
+  dirRE: /^v-/,
+  xlinkRE: /^xlink([A-Z])/
+}
+
 module.exports = wrapper
 
 function wrapper(h, node, options) {
@@ -174,8 +190,38 @@ function addAttribute(props, prop, value, ctx) {
     } else if (ctx.hyperscript === true) {
       subprop = 'attrs'
     } else if (ctx.vue === true) {
-      if (info.property && info.property !== 'style') {
-        subprop = 'attrs'
+      var name = info.property
+      if (!vueUtils.isTopLevel(name)) {
+        // nested modules
+        var nestMatch = name.match(vueUtils.nestableRE)
+        if (nestMatch) {
+          var prefix = nestMatch[1]
+          var suffix = name.replace(vueUtils.nestableRE, function(_, $1, $2) {
+            return $2 === '-' ? '' : $2.toLowerCase()
+          })
+          info.attribute = suffix
+          subprop = prefix
+        } else if (vueUtils.dirRE.test(name)) {
+          // custom directive
+          name = name.replace(vueUtils.dirRE, '')
+          value = {
+            name: name,
+            value: value
+          }
+          value = props.directives ? props.directives.concat([value]) : [value]
+          info.attribute = 'directives'
+        } else {
+          // rest are nested under attrs
+          // guard xlink attributes
+          if (vueUtils.xlinkRE.test(name)) {
+            info.attribute = JSON.stringify(
+              name.replace(vueUtils.xlinkRE, function(m, p1) {
+                return 'xlink:' + p1.toLowerCase()
+              })
+            )
+          }
+          subprop = 'attrs'
+        }
       }
     }
   }
@@ -245,4 +291,14 @@ function styleCase(val) {
 
 function styleReplacer($0, $1) {
   return $1.toUpperCase()
+}
+
+function makeMap(array) {
+  var map = array.reduce(function(acc, key) {
+    acc[key] = true
+    return acc
+  }, {})
+  return function(val) {
+    return map[val]
+  }
 }
