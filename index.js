@@ -22,7 +22,7 @@ var vueUtils = {
     'slot',
     'scopedSlots'
   ]),
-  nestableRE: /^(props|domProps|on|nativeOn|hook)([\-_A-Z])/,
+  nestableRE: /^(props|domProps|on|nativeOn|hook)([-_A-Z])/,
   dirRE: /^v-/,
   xlinkRE: /^xlink([A-Z])/
 }
@@ -190,42 +190,10 @@ function addAttribute(props, prop, value, ctx) {
     } else if (ctx.hyperscript === true) {
       subprop = 'attrs'
     } else if (ctx.vue === true) {
-      var name = info.property
-      if (!vueUtils.isTopLevel(name)) {
-        // nested modules
-        var nestMatch = name.match(vueUtils.nestableRE)
-        if (nestMatch) {
-          var prefix = nestMatch[1]
-          var suffix = name.replace(vueUtils.nestableRE, function(_, $1, $2) {
-            return $2 === '-' ? '' : $2.toLowerCase()
-          })
-          info.attribute = suffix
-          subprop = prefix
-        } else if (vueUtils.dirRE.test(name)) {
-          // custom directive
-          name = name.replace(vueUtils.dirRE, '')
-          value = {
-            name: name,
-            value: value
-          }
-          value = props.directives ? props.directives.concat([value]) : [value]
-          info.attribute = 'directives'
-        } else {
-          // rest are nested under attrs
-          // guard xlink attributes
-          if (vueUtils.xlinkRE.test(name)) {
-            info.attribute = JSON.stringify(
-              name.replace(vueUtils.xlinkRE, function(m, p1) {
-                return 'xlink:' + p1.toLowerCase()
-              })
-            )
-          }
-          subprop = 'attrs'
-        }
-      }
+      vueMergeAttributes(props, info, value)
+      return
     }
   }
-
   if (subprop) {
     if (props[subprop] === undefined) {
       props[subprop] = {}
@@ -235,6 +203,69 @@ function addAttribute(props, prop, value, ctx) {
   } else {
     props[ctx.react && info.space ? info.property : info.attribute] = value
   }
+}
+
+function vueMergeAttributes(props, info, value) {
+  var groupProp = vueGroupAttribute(info, value)
+  var propName = groupProp.name
+  var propValue = groupProp.value
+
+  props[propName] =
+    typeof propValue === 'object'
+      ? Object.assign({}, props[propName] || {}, propValue)
+      : Array.isArray(propValue)
+        ? [].concat(props[propName] || [], propValue)
+        : propValue
+}
+
+function vueGroupAttribute(info, value) {
+  var name = info.property
+  var props = {}
+
+  if (vueUtils.isTopLevel(name)) {
+    props.name = name
+    props.value = value
+  } else {
+    // Nested modules
+    var nestMatch = name.match(vueUtils.nestableRE)
+    if (nestMatch) {
+      var prefix = nestMatch[1]
+      var suffix = name.replace(vueUtils.nestableRE, function(_, $1, $2) {
+        return $2 === '-' ? '' : $2.toLowerCase()
+      })
+
+      var subProp = {}
+      subProp[suffix] = value
+      props.name = prefix
+      props.value = subProp
+    } else if (vueUtils.dirRE.test(info.attribute)) {
+      // Custom directive
+      props.name = 'directives'
+      props.value = [
+        {
+          name: info.attribute.replace(vueUtils.dirRE, ''),
+          value: value
+        }
+      ]
+    } else {
+      // Rest are nested under attrs
+      // guard xlink attributes
+      var attribute = vueUtils.xlinkRE.test(info.attribute)
+        ? JSON.stringify(
+            info.attribute.replace(vueUtils.xlinkRE, function(m, p1) {
+              return 'xlink:' + p1.toLowerCase()
+            })
+          )
+        : info.attribute
+
+      var attrs = {}
+      attrs[attribute] = value
+      props.name = 'attrs'
+      props.value = attrs
+    }
+  }
+
+  return props
 }
 
 // Check if `h` is `react.createElement`.
