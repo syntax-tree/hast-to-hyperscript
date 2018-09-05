@@ -10,6 +10,9 @@ var r = require('react').createElement
 var rehype = require('rehype')
 var vToString = require('vdom-to-html')
 var rToString = require('react-dom/server').renderToStaticMarkup
+var vueToString = require('vue-server-renderer').createRenderer({
+  template: '<!--vue-ssr-outlet-->'
+}).renderToString
 var toH = require('.')
 
 var processor = rehype().data('settings', {fragment: true, position: false})
