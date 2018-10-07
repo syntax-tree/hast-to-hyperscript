@@ -222,9 +222,12 @@ function vueGroupAttribute(info, value) {
   var name = info.property
   var props = {}
 
+  var processeddName
+  var processedValue
+
   if (vueUtils.topLevel.indexOf(name) > -1) {
-    props.name = name
-    props.value = value
+    processeddName = name
+    processedValue = value
   } else {
     // Nested modules
     var nestMatch = name.match(vueUtils.nestableRE)
@@ -236,12 +239,12 @@ function vueGroupAttribute(info, value) {
 
       var subProp = {}
       subProp[suffix] = value
-      props.name = prefix
-      props.value = subProp
+      processeddName = prefix
+      processedValue = subProp
     } else if (vueUtils.dirRE.test(info.attribute)) {
       // Custom directive
-      props.name = 'directives'
-      props.value = [
+      processeddName = 'directives'
+      processedValue = [
         {
           name: info.attribute.replace(vueUtils.dirRE, ''),
           value: value
@@ -261,10 +264,13 @@ function vueGroupAttribute(info, value) {
 
       var attrs = {}
       attrs[attribute] = value
-      props.name = 'attrs'
-      props.value = attrs
+      processeddName = 'attrs'
+      processedValue = attrs
     }
   }
+
+  props.name = processeddName
+  props.value = processedValue
 
   return props
 }
