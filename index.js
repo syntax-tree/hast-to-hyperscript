@@ -250,13 +250,14 @@ function vueGroupAttribute(info, value) {
     } else {
       // Rest are nested under attrs
       // guard xlink attributes
-      var attribute = vueUtils.xlinkRE.test(info.attribute)
-        ? JSON.stringify(
-            info.attribute.replace(vueUtils.xlinkRE, function(m, p1) {
-              return 'xlink:' + p1.toLowerCase()
-            })
-          )
-        : info.attribute
+      var attribute =
+        info.space && info.space === 'xlink'
+          ? JSON.stringify(
+              info.attribute.replace(vueUtils.xlinkRE, function(m, p1) {
+                return 'xlink:' + p1.toLowerCase()
+              })
+            )
+          : info.attribute
 
       var attrs = {}
       attrs[attribute] = value
