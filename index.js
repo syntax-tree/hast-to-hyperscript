@@ -12,7 +12,7 @@ var is = require('unist-util-is')
 var dashes = /-([a-z])/g
 
 var vueUtils = {
-  isTopLevel: makeMap([
+  topLevel: [
     'class',
     'staticClass',
     'style',
@@ -21,7 +21,7 @@ var vueUtils = {
     'refInFor',
     'slot',
     'scopedSlots'
-  ]),
+  ],
   nestableRE: /^(props|domProps|on|nativeOn|hook)([-_A-Z])/,
   dirRE: /^v-/,
   xlinkRE: /^xlink([A-Z])/
@@ -222,7 +222,7 @@ function vueGroupAttribute(info, value) {
   var name = info.property
   var props = {}
 
-  if (vueUtils.isTopLevel(name)) {
+  if (vueUtils.topLevel.indexOf(name) > -1) {
     props.name = name
     props.value = value
   } else {
@@ -319,14 +319,4 @@ function styleCase(val) {
 
 function styleReplacer($0, $1) {
   return $1.toUpperCase()
-}
-
-function makeMap(array) {
-  var map = array.reduce(function(acc, key) {
-    acc[key] = true
-    return acc
-  }, {})
-  return function(val) {
-    return map[val]
-  }
 }
