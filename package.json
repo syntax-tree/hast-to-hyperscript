@@ -15,9 +15,9 @@
   ],
   "repository": "syntax-tree/hast-to-hyperscript",
   "bugs": "https://github.com/syntax-tree/hast-to-hyperscript/issues",
-  "author": "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
   "contributors": [
-    "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
     "Jannis Redmann <mail@jannisr.de>",
     "Koto Hajime <toxictoxer@gmail.com>"
   ],
