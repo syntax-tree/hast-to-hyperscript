@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "comma-separated-tokens": "^1.0.0",
-    "property-information": "^4.0.0",
+    "property-information": "^5.0.0",
     "space-separated-tokens": "^1.0.0",
     "style-to-object": "^0.2.1",
     "unist-util-is": "^2.0.0",
@@ -52,7 +52,7 @@
   "scripts": {
     "format": "remark . -qfo && prettier --write '**/*.js' && xo --fix",
     "build-bundle": "browserify index.js -s hastToHyperscript > hast-to-hyperscript.js",
-    "build-mangle": "browserify index.js -p tinyify -s hastToHyperscript > hast-to-hyperscript.min.js",
+    "build-mangle": "browserify index.js -s hastToHyperscript -p tinyify > hast-to-hyperscript.min.js",
     "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test.js",
