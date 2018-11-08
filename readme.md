@@ -138,9 +138,9 @@ repository, organisation, or community you agree to abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
-[license]: LICENSE
+[license]: license
 
-[author]: http://wooorm.com
+[author]: https://wooorm.com
 
 [hast]: https://github.com/syntax-tree/hast
 

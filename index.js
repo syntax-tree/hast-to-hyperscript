@@ -304,9 +304,10 @@ function parseStyle(value, tagName) {
 
   try {
     style(value, iterator)
-  } catch (err) {
-    err.message = tagName + '[style]' + err.message.slice('undefined'.length)
-    throw err
+  } catch (error) {
+    error.message =
+      tagName + '[style]' + error.message.slice('undefined'.length)
+    throw error
   }
 
   return result

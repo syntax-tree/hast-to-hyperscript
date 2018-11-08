@@ -1,6 +1,6 @@
 {
   "name": "hast-to-hyperscript",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Transform HAST to something else through a hyperscript DSL",
   "license": "MIT",
   "keywords": [
@@ -15,9 +15,9 @@
   ],
   "repository": "syntax-tree/hast-to-hyperscript",
   "bugs": "https://github.com/syntax-tree/hast-to-hyperscript/issues",
-  "author": "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
   "contributors": [
-    "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
     "Jannis Redmann <mail@jannisr.de>",
     "Koto Hajime <toxictoxer@gmail.com>"
   ],
@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "comma-separated-tokens": "^1.0.0",
-    "property-information": "^4.0.0",
+    "property-information": "^5.0.0",
     "space-separated-tokens": "^1.0.0",
     "style-to-object": "^0.2.1",
     "unist-util-is": "^2.0.0",
@@ -35,12 +35,12 @@
   "devDependencies": {
     "browserify": "^16.0.0",
     "hyperscript": "^2.0.2",
-    "nyc": "^12.0.0",
+    "nyc": "^13.0.0",
     "prettier": "^1.13.5",
-    "react": "^16.1.1",
-    "react-dom": "^16.1.1",
+    "react": "^16.6.1",
+    "react-dom": "^16.6.1",
     "rehype": "^6.0.0",
-    "remark-cli": "^5.0.0",
+    "remark-cli": "^6.0.0",
     "remark-preset-wooorm": "^4.0.0",
     "tape": "^4.0.0",
     "tinyify": "^2.4.3",
@@ -49,12 +49,12 @@
     "virtual-dom": "^2.1.1",
     "vue": "^2.5.17",
     "vue-server-renderer": "^2.5.17",
-    "xo": "^0.21.0"
+    "xo": "^0.23.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier --write '**/*.js' && xo --fix",
     "build-bundle": "browserify index.js -s hastToHyperscript > hast-to-hyperscript.js",
-    "build-mangle": "browserify index.js -p tinyify -s hastToHyperscript > hast-to-hyperscript.min.js",
+    "build-mangle": "browserify index.js -s hastToHyperscript -p tinyify > hast-to-hyperscript.min.js",
     "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test.js",
