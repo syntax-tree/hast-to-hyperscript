@@ -78,7 +78,8 @@
     "rules": {
       "unicorn/prefer-type-error": "off",
       "guard-for-in": "off",
-      "no-self-compare": "off"
+      "no-self-compare": "off",
+      "complexity": "off"
     }
   },
   "remarkConfig": {

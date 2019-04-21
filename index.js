@@ -140,17 +140,19 @@ function toH(h, node, ctx) {
 }
 
 function addAttribute(props, prop, value, ctx) {
+  var hyperlike = ctx.hyperscript || ctx.vdom
   var schema = ctx.schema
   var info = find(schema, prop)
   var subprop
 
-  // Ignore nully, `false`, `NaN`, and falsey known booleans.
+  // Ignore nully and `NaN` values.
+  // Ignore `false` and falsey known booleans for hyperlike DSLs.
   if (
     value === null ||
     value === undefined ||
-    value === false ||
     value !== value ||
-    (info.boolean && !value)
+    (hyperlike && value === false) ||
+    (hyperlike && info.boolean && !value)
   ) {
     return
   }
