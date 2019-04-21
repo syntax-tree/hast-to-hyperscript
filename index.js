@@ -18,6 +18,7 @@ function wrapper(h, node, options) {
   var prefix
   var r
   var v
+  var vd
 
   if (typeof h !== 'function') {
     throw new Error('h is not a function')
@@ -31,10 +32,11 @@ function wrapper(h, node, options) {
   }
 
   r = react(h)
-  v = vdom(h)
+  v = vue(h)
+  vd = vdom(h)
 
   if (prefix === null || prefix === undefined) {
-    prefix = r === true || v === true ? 'h-' : false
+    prefix = r === true || v === true || vd === true ? 'h-' : false
   }
 
   if (is('root', node)) {
@@ -59,7 +61,8 @@ function wrapper(h, node, options) {
     prefix: prefix,
     key: 0,
     react: r,
-    vdom: v,
+    vue: v,
+    vdom: vd,
     hyperscript: hyperscript(h)
   })
 }
@@ -98,9 +101,9 @@ function toH(h, node, ctx) {
 
   if (
     typeof attributes.style === 'string' &&
-    (ctx.vdom === true || ctx.react === true)
+    (ctx.vdom === true || ctx.vue === true || ctx.react === true)
   ) {
-    // VDOM and React accept `style` as object.
+    // VDOM, Vue, and React accept `style` as object.
     attributes.style = parseStyle(attributes.style, name)
   }
 
@@ -167,7 +170,11 @@ function addAttribute(props, prop, value, ctx) {
     value = ''
   }
 
-  if (!info.mustUseProperty) {
+  if (ctx.vue) {
+    if (prop !== 'style') {
+      subprop = 'attrs'
+    }
+  } else if (!info.mustUseProperty) {
     if (ctx.vdom === true) {
       subprop = 'attributes'
     } else if (ctx.hyperscript === true) {
@@ -202,6 +209,11 @@ function hyperscript(h) {
 // Check if `h` is `virtual-dom/h`.
 function vdom(h) {
   return h && h('div').type === 'VirtualNode'
+}
+
+function vue(h) {
+  var node = h && h('div')
+  return Boolean(node && node.context && node.context._isVue)
 }
 
 function parseStyle(value, tagName) {
