@@ -143,7 +143,7 @@ function toH(h, node, ctx) {
 }
 
 function addAttribute(props, prop, value, ctx) {
-  var hyperlike = ctx.hyperscript || ctx.vdom
+  var hyperlike = ctx.hyperscript || ctx.vdom || ctx.vue
   var schema = ctx.schema
   var info = find(schema, prop)
   var subprop
