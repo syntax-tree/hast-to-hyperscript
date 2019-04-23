@@ -275,6 +275,8 @@ test('hast-to-hyperscript', function(t) {
           {
             key: 'h-3',
             style: {color: 'red'},
+            ignored: false,
+            disabled: 0,
             foo: 'bar',
             camelCase: 'on off',
             'data-123': '456',
@@ -341,6 +343,8 @@ test('hast-to-hyperscript', function(t) {
           {
             key: 'h-3',
             style: {color: 'red'},
+            ignored: false,
+            disabled: 0,
             foo: 'bar',
             camelCase: 'on off',
             'data-123': '456',
