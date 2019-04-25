@@ -107,6 +107,7 @@ hyperscript doesn’t support classes in `attrs`, `virtual-dom/h` needs an
 works around these differences for:
 
 *   [`React.createElement`][react]
+*   Vue’s [`createElement`][vue]
 *   [`virtual-dom/h`][vdom]
 *   [`hyperscript`][hyperscript]
 
@@ -153,6 +154,8 @@ repository, organisation, or community you agree to abide by its terms.
 [h]: #function-hname-attrs-children
 
 [react]: https://facebook.github.io/react/docs/glossary.html#react-elements
+
+[vue]: https://vuejs.org/v2/guide/render-function.html#createElement-Arguments
 
 [hastscript]: https://github.com/syntax-tree/hastscript
 
