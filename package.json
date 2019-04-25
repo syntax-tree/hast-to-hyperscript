@@ -47,6 +47,8 @@
     "unist-builder": "^1.0.1",
     "vdom-to-html": "^2.3.1",
     "virtual-dom": "^2.1.1",
+    "vue": "^2.6.10",
+    "vue-server-renderer": "^2.6.10",
     "xo": "^0.24.0"
   },
   "scripts": {

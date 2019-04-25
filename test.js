@@ -10,6 +10,8 @@ var r = require('react').createElement
 var rehype = require('rehype')
 var vToString = require('vdom-to-html')
 var rToString = require('react-dom/server').renderToStaticMarkup
+var Vue = require('vue')
+var VueSSR = require('vue-server-renderer')
 var toH = require('.')
 
 var processor = rehype().data('settings', {fragment: true, position: false})
@@ -386,6 +388,119 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
+  t.test('should support `Vue`', function(st) {
+    var baseline = doc.replace(/<div>/, '<div data-server-rendered="true">')
+    var actual
+    var expected
+
+    st.plan(3)
+
+    Promise.all([vueToString(actualRender), vueToString(expectedRender)])
+      .then(function(all) {
+        var actualString = all[0]
+        var expectedString = all[0]
+
+        st.deepEqual(clean(actual), clean(expected), 'equal syntax trees')
+        st.deepEqual(html(actualString), html(baseline), 'equal output')
+
+        st.deepEqual(
+          html(expectedString),
+          html(baseline),
+          'equal output baseline'
+        )
+      })
+      .catch(function(error) {
+        st.ifErr(error, 'did not expect an error')
+      })
+
+    function actualRender(h) {
+      actual = toH(h, hast)
+      return actual
+    }
+
+    function expectedRender(h) {
+      expected = h(
+        'div',
+        {key: 'h-1', attrs: {'data-server-rendered': 'true'}},
+        [
+          h(
+            'h1',
+            {
+              key: 'h-2',
+              attrs: {
+                class: 'b c',
+                id: 'a',
+                hidden: true,
+                height: 2
+              }
+            },
+            [
+              'bravo ',
+              h(
+                'strong',
+                {
+                  key: 'h-3',
+                  style: {color: 'red'},
+                  attrs: {
+                    foo: 'bar',
+                    camelCase: 'on off',
+                    'data-123': '456',
+                    'data-some': 'yes',
+                    'aria-valuenow': '1'
+                  }
+                },
+                ['charlie']
+              ),
+              ' delta',
+              h('input', {
+                key: 'h-4',
+                attrs: {
+                  checked: true,
+                  type: 'file',
+                  accept: '.jpg, .jpeg'
+                }
+              })
+            ]
+          ),
+          h(
+            'svg',
+            {
+              key: 'h-5',
+              attrs: {
+                xmlns: 'http://www.w3.org/2000/svg',
+                viewBox: '0 0 500 500'
+              }
+            },
+            [h('circle', {key: 'h-6', attrs: {cx: 120, cy: 120, r: 100}})]
+          )
+        ]
+      )
+      return expected
+    }
+
+    function identity(value) {
+      return value
+    }
+
+    function vueToString(render) {
+      return VueSSR.createRenderer({template: identity}).renderToString(
+        new Vue({render: render}).$mount()
+      )
+    }
+
+    function clean(node) {
+      remove(node)
+      return json(node)
+    }
+
+    function remove(node) {
+      delete node.context
+      if (node.children) {
+        node.children.forEach(remove)
+      }
+    }
+  })
+
   t.test('should support keys', function(st) {
     st.equal(
       toH(h, u('element', {tagName: 'div'})).key,
@@ -508,9 +623,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('flattens a `root` with one element child to that child', function(
-    st
-  ) {
+  t.test('flattens a `root` with one element to that child', function(st) {
     var actual = toH(
       h,
       u('root', [u('element', {tagName: 'h1', properties: {id: 'a'}}, [])])
