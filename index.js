@@ -67,8 +67,7 @@ function wrapper(h, node, options) {
   })
 }
 
-// Transform a HAST node through a hyperscript interface
-// to *anything*!
+// Transform a hast node through a hyperscript interface to *anything*!
 function toH(h, node, ctx) {
   var parentSchema = ctx.schema
   var schema = parentSchema
@@ -131,8 +130,8 @@ function toH(h, node, ctx) {
     }
   }
 
-  // Ensure no React warnings are triggered for
-  // void elements having children passed in.
+  // Ensure no React warnings are triggered for void elements having children
+  // passed in.
   result =
     elements.length === 0 ? h(name, attributes) : h(name, attributes, elements)
 
@@ -161,7 +160,8 @@ function addAttribute(props, prop, value, ctx) {
   }
 
   if (value !== null && typeof value === 'object' && 'length' in value) {
-    // Accept `array`.  Most props are space-separater.
+    // Accept `array`.
+    // Most props are space-separated.
     value = (info.commaSeparated ? commas : spaces).stringify(value)
   }
 
