@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-- lts/boron
-- node
+  - lts/dubnium
+  - node
 after_script: bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: releases
@@ -9,7 +9,7 @@ deploy:
   api_key:
     secure: l2cYsafuSX1mC35YGxFau3uMsjlF4rJExLap+SDVO01B23TavJe9sGeO2L7T+CZf0pM+W4JHm7/WamSlpi+ZyoSZiXfwiXq50HQKLPMiA3cBkd01GZ2TOxx6CfgyAZgbScj5RvV5miYOt3BRnl5okRjXK1SS56TCbQdi9xutcwwmW6lEI09lg1A4sfpos9OKNVSX/f5wr6/xZNh4wI1W18tgqtjnYXnqrcdhmHgzJ/gkllu9vydtDJHh0Dvgvf85LYYLbBtkWb8ujsihC3rfmLHQ/214vA/EHvy0foVTOCpRZDMhPdlswx7EpGOOugomz4P3ZSlhd6INUbu9vIxMVLAl7x/IOqjGILU8lJquu95bjLOH0zQnojLojlElISq8OiNRLuJ6liFKBWiu34rYhyUPIsNAHx38SSEbfoW1O8BljW/wbTN0qi2rx4wWtKEU/yYMZVBAPSvUT0XnY6aXJoGjwoxw29EcJ041RH3+HqLXa6TBalvCNgDN6tyce2ojXv9mJqAIXqAB2gnmKA0e6BukoPXUwIc3oo67MiF8iuCp80Ol3LBnJNaUiOffOuYdjc1q5Ej1szIsNY/gD58fPZonMZ6fa8x6tdIzeS148mQvfAB/KpVWtPjZ4vd+/s1KhEWg7nsCEgpttPaSxUG7lYGjCI1YSeCSeIn6zec1oxE=
   file:
-    - "hast-to-hyperscript.js"
-    - "hast-to-hyperscript.min.js"
+    - 'hast-to-hyperscript.js'
+    - 'hast-to-hyperscript.min.js'
   on:
     tags: true
