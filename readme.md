@@ -1,18 +1,27 @@
-# hast-to-hyperscript [![Build Status][travis-badge]][travis] [![Coverage Status][codecov-badge]][codecov]
+# hast-to-hyperscript
 
-Transform [HAST][] to something else through a [hyperscript][] DSL.
+[![Build][build-badge]][build]
+[![Coverage][coverage-badge]][coverage]
+[![Downloads][downloads-badge]][downloads]
+[![Size][size-badge]][size]
+[![Sponsors][sponsors-badge]][collective]
+[![Backers][backers-badge]][collective]
+[![Chat][chat-badge]][chat]
 
-## Installation
+[**hast**][hast] utility to transform a [*tree*][tree] to something else through
+a [hyperscript][] DSL.
+
+## Install
 
 [npm][]:
 
-```bash
+```sh
 npm install hast-to-hyperscript
 ```
 
 ## Usage
 
-```javascript
+```js
 var toH = require('hast-to-hyperscript')
 var h = require('hyperscript')
 
@@ -46,25 +55,27 @@ Yields:
 
 ## API
 
-### `toH(h, node[, options|prefix])`
+### `toH(h, tree[, options|prefix])`
 
-Transform [HAST][] to something else through a [hyperscript][] DSL.
+Transform a [**hast**][hast] [*tree*][tree] to something else through a
+[hyperscript][] DSL.
 
 ###### Parameters
 
-*   `h` ([`Function`][h])
-*   `node` ([`Element`][element])
+*   `h` ([`Function`][h]) — Hyperscript function
+*   `tree` ([`Node`][node]) — [*Tree*][tree] to transform
 *   `prefix` — Treated as `{prefix: prefix}`
 *   `options.prefix` (`string` or `boolean`, optional)
     — Prefix to use as a prefix for keys passed in `attrs` to `h()`,
     this behaviour is turned off by passing `false`, turned on by passing
-    a `string`.  By default, `h-` is used as a prefix if the given `h`
-    is detected as being `virtual-dom/h` or `React.createElement`
+    a `string`.
+    By default, `h-` is used as a prefix if the given `h` is detected as being
+    `virtual-dom/h` or `React.createElement`
 *   `options.space` (enum, `'svg'` or `'html'`, default: `'html'`)
     — Whether `node` is in the `'html'` or `'svg'` space.
     If an `svg` element is found when inside the HTML space, `toH` automatically
     switches to the SVG space when entering the element, and switches back when
-    leaving
+    exiting
 
 ###### Returns
 
@@ -72,39 +83,47 @@ Transform [HAST][] to something else through a [hyperscript][] DSL.
 
 ### `function h(name, attrs, children)`
 
-Transform [HAST][] to something else through a hyperscript DSL.
+Create an [*element*][element] from the given values.
 
 ###### Parameters
 
 *   `name` (`string`) — Tag-name of element to create
 *   `attrs` (`Object.<string>`) — Attributes to set
-*   `children` (`Array.<* | string>`) — List of children and text,
-    where children are the result of invoking `h()` previously
+*   `children` (`Array.<* | string>`) — List of children (results of previously
+    invoking `h()`)
 
 ###### Returns
 
 `*` — Anything.
 
-###### Caveats
+##### Caveats
 
-**Nodes**: Most hyperscript implementations only support elements and text (as
-leave nodes).  HAST supports `doctype`, `comment`, and `root` as well.
+###### Nodes
 
-*   If anything other than an `element` or `root` node is given,
-    `hast-to-hyperscript` throws
-*   If a `root` is given with one element child, that element is
-    transformed
-*   If a `root` with no children, a non-element only child, or more than one
-    children, the children are wrapped in a `div` element
+Most Hyperscript implementations only support [*elements*][element] and
+[*texts*][text].
+[**hast**][hast] supports [*doctype*][doctype], [*comment*][comment], and
+[*root*][root] as well.
 
-If unknown nodes are found deeper in the tree, they are ignored: only `text`
-and `element` nodes are transformed.
+*   If anything other than an `element` or `root` node is given, `toH` throws
+*   If a [*root*][root] is given with no [*children*][child], an empty `div`
+    [*element*][element] is returned
+*   If a [*root*][root] is given with one [*element*][element] [*child*][child],
+    that element is transformed
+*   Otherwise, the children are wrapped in a `div` [*element*][element]
 
-**Support**: Although there are lots of libs mentioning support for this
-interface, there are significant differences between them.  For example,
-hyperscript doesn’t support classes in `attrs`, `virtual-dom/h` needs an
-`attributes` object inside `attrs` most of the time.  `hast-to-hyperscript`
-works around these differences for:
+If unknown nodes (a node with a [*type*][type] not defined by [**hast**][hast])
+are found as [*descendants*][descendant] of the given [*tree*][tree], they are
+ignored: only [*text*][text] and [*element*][element] are transformed.
+
+###### Support
+
+Although there are lots of libraries mentioning support for a hyperscript-like
+interface, there are significant differences between them.
+For example, [`hyperscript`][hyperscript] doesn’t support classes in `attrs` and
+[`virtual-dom/h`][vdom] needs an `attributes` object inside `attrs` most of the
+time.
+`toH` works around these differences for:
 
 *   [`React.createElement`][react]
 *   Vue’s [`createElement`][vue]
@@ -117,11 +136,13 @@ works around these differences for:
 
 ## Contribute
 
-See [`contributing.md` in `syntax-tree/hast`][contributing] for ways to get
+See [`contributing.md` in `syntax-tree/.github`][contributing] for ways to get
 started.
+See [`support.md`][support] for ways to get help.
 
-This organisation has a [Code of Conduct][coc].  By interacting with this
-repository, organisation, or community you agree to abide by its terms.
+This project has a [Code of Conduct][coc].
+By interacting with this repository, organisation, or community you agree to
+abide by its terms.
 
 ## License
 
@@ -129,13 +150,31 @@ repository, organisation, or community you agree to abide by its terms.
 
 <!-- Definitions -->
 
-[travis-badge]: https://img.shields.io/travis/syntax-tree/hast-to-hyperscript.svg
+[build-badge]: https://img.shields.io/travis/syntax-tree/hast-to-hyperscript.svg
 
-[travis]: https://travis-ci.org/syntax-tree/hast-to-hyperscript
+[build]: https://travis-ci.org/syntax-tree/hast-to-hyperscript
 
-[codecov-badge]: https://img.shields.io/codecov/c/github/syntax-tree/hast-to-hyperscript.svg
+[coverage-badge]: https://img.shields.io/codecov/c/github/syntax-tree/hast-to-hyperscript.svg
 
-[codecov]: https://codecov.io/github/syntax-tree/hast-to-hyperscript
+[coverage]: https://codecov.io/github/syntax-tree/hast-to-hyperscript
+
+[downloads-badge]: https://img.shields.io/npm/dm/hast-to-hyperscript.svg
+
+[downloads]: https://www.npmjs.com/package/hast-to-hyperscript
+
+[size-badge]: https://img.shields.io/bundlephobia/minzip/hast-to-hyperscript.svg
+
+[size]: https://bundlephobia.com/result?p=hast-to-hyperscript
+
+[sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
+
+[backers-badge]: https://opencollective.com/unified/backers/badge.svg
+
+[collective]: https://opencollective.com/unified
+
+[chat-badge]: https://img.shields.io/badge/join%20the%20community-on%20spectrum-7b16ff.svg
+
+[chat]: https://spectrum.chat/unified/syntax-tree
 
 [npm]: https://docs.npmjs.com/cli/install
 
@@ -143,22 +182,42 @@ repository, organisation, or community you agree to abide by its terms.
 
 [author]: https://wooorm.com
 
-[hast]: https://github.com/syntax-tree/hast
+[contributing]: https://github.com/syntax-tree/.github/blob/master/contributing.md
 
-[element]: https://github.com/syntax-tree/hast#element
+[support]: https://github.com/syntax-tree/.github/blob/master/support.md
+
+[coc]: https://github.com/syntax-tree/.github/blob/master/code-of-conduct.md
 
 [vdom]: https://github.com/Matt-Esch/virtual-dom/tree/master/virtual-hyperscript
 
-[hyperscript]: https://github.com/dominictarr/hyperscript
+[hyperscript]: https://github.com/hyperhype/hyperscript
 
-[h]: #function-hname-attrs-children
-
-[react]: https://facebook.github.io/react/docs/glossary.html#react-elements
+[react]: https://reactjs.org/docs/glossary.html#react-elements
 
 [vue]: https://vuejs.org/v2/guide/render-function.html#createElement-Arguments
 
 [hastscript]: https://github.com/syntax-tree/hastscript
 
-[contributing]: https://github.com/syntax-tree/hast/blob/master/contributing.md
+[tree]: https://github.com/syntax-tree/unist#tree
 
-[coc]: https://github.com/syntax-tree/hast/blob/master/code-of-conduct.md
+[child]: https://github.com/syntax-tree/unist#child
+
+[type]: https://github.com/syntax-tree/unist#type
+
+[descendant]: https://github.com/syntax-tree/unist#descendant
+
+[hast]: https://github.com/syntax-tree/hast
+
+[node]: https://github.com/syntax-tree/hast#nodes
+
+[text]: https://github.com/syntax-tree/hast#text
+
+[doctype]: https://github.com/syntax-tree/hast#doctype
+
+[root]: https://github.com/syntax-tree/hast#root
+
+[comment]: https://github.com/syntax-tree/hast#comment
+
+[element]: https://github.com/syntax-tree/hast#element
+
+[h]: #function-hname-attrs-children
