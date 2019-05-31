@@ -7,7 +7,11 @@ var spaces = require('space-separated-tokens')
 var commas = require('comma-separated-tokens')
 var style = require('style-to-object')
 var ns = require('web-namespaces')
-var is = require('unist-util-is')
+var convert = require('unist-util-is/convert')
+
+var root = convert('root')
+var element = convert('element')
+var text = convert('text')
 
 var dashes = /-([a-z])/g
 
@@ -39,8 +43,8 @@ function wrapper(h, node, options) {
     prefix = r === true || v === true || vd === true ? 'h-' : false
   }
 
-  if (is('root', node)) {
-    if (node.children.length === 1 && is('element', node.children[0])) {
+  if (root(node)) {
+    if (node.children.length === 1 && element(node.children[0])) {
       node = node.children[0]
     } else {
       node = {
@@ -50,7 +54,7 @@ function wrapper(h, node, options) {
         children: node.children
       }
     }
-  } else if (!is('element', node)) {
+  } else if (!element(node)) {
     throw new Error(
       'Expected root or element, not `' + ((node && node.type) || node) + '`'
     )
@@ -123,9 +127,9 @@ function toH(h, node, ctx) {
   while (++index < length) {
     value = children[index]
 
-    if (is('element', value)) {
+    if (element(value)) {
       elements.push(toH(h, value, ctx))
-    } else if (is('text', value)) {
+    } else if (text(value)) {
       elements.push(value.value)
     }
   }

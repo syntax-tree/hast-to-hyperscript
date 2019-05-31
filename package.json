@@ -29,7 +29,7 @@
     "property-information": "^5.0.0",
     "space-separated-tokens": "^1.0.0",
     "style-to-object": "^0.2.1",
-    "unist-util-is": "^2.0.0",
+    "unist-util-is": "^3.0.0",
     "web-namespaces": "^1.1.2"
   },
   "devDependencies": {
