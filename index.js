@@ -99,7 +99,7 @@ function toH(h, node, ctx) {
   attributes = {}
 
   for (property in properties) {
-    addAttribute(attributes, property, properties[property], ctx)
+    addAttribute(h, attributes, property, properties[property], ctx)
   }
 
   if (
@@ -145,7 +145,7 @@ function toH(h, node, ctx) {
   return result
 }
 
-function addAttribute(props, prop, value, ctx) {
+function addAttribute(h, props, prop, value, ctx) {
   var hyperlike = ctx.hyperscript || ctx.vdom || ctx.vue
   var schema = ctx.schema
   var info = find(schema, prop)
@@ -193,7 +193,11 @@ function addAttribute(props, prop, value, ctx) {
 
     props[subprop][info.attribute] = value
   } else {
-    props[ctx.react && info.space ? info.property : info.attribute] = value
+    props[ctx.react && info.space ? info.property : info.attribute] = element(
+      value
+    )
+      ? toH(h, value, ctx)
+      : value
   }
 }
 
@@ -222,7 +226,6 @@ function vue(h) {
 
 function parseStyle(value, tagName) {
   var result = {}
-
   try {
     style(value, iterator)
   } catch (error) {

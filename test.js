@@ -672,6 +672,40 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
+  t.test('should support hast element set as property', function(st) {
+    const tree = u(
+      'element',
+      {
+        tagName: 'div',
+        properties: {
+          icon: u('element', {
+            tagName: 'div',
+            properties: {
+              avatar: u('element', {tagName: 'span'}, [u('text', 'div text')])
+            }
+          })
+        }
+      },
+      [u('element', {tagName: 'div'})]
+    )
+
+    const expected = r(
+      'div',
+      {
+        key: 'h-3',
+        icon: r('div', {
+          key: 'h-2',
+          avatar: r('span', {key: 'h-1'}, ['div text'])
+        })
+      },
+      [r('div', {key: 'h-4'})]
+    )
+
+    var actual = toH(r, tree)
+    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    st.end()
+  })
+
   t.end()
 })
 
