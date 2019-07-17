@@ -130,9 +130,16 @@ time.
 *   [`virtual-dom/h`][vdom]
 *   [`hyperscript`][hyperscript]
 
+## Security
+
+Use of `hast-to-hyperscript` can open you up to a
+[cross-site scripting (XSS)][xss] attack if the hast tree is unsafe.
+Use [`hast-util-santize`][sanitize] to make the hast tree safe.
+
 ## Related
 
-*   [`hastscript`][hastscript]
+*   [`hastscript`][hastscript] — Hyperscript compatible DSL for creating nodes
+*   [`hast-util-sanitize`][sanitize] — Sanitise nodes
 
 ## Contribute
 
@@ -221,3 +228,7 @@ abide by its terms.
 [element]: https://github.com/syntax-tree/hast#element
 
 [h]: #function-hname-attrs-children
+
+[xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
+
+[sanitize]: https://github.com/syntax-tree/hast-util-sanitize
