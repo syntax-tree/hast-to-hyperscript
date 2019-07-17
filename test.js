@@ -566,12 +566,12 @@ test('hast-to-hyperscript', function(t) {
           r,
           u('element', {
             tagName: 'div',
-            properties: {style: '; color; border: 1;'}
+            properties: {style: 'color:red; /*'}
           })
         )
       },
-      /^Error: div\[style]:1:3: missing '\}'$/,
-      'react: should throw on invalid style declarations'
+      /^Error: div\[style\]:1:12: End of comment missing$/,
+      'react: should ignore invalid style declarations'
     )
 
     st.deepEqual(
