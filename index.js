@@ -193,7 +193,10 @@ function addAttribute(props, prop, value, ctx) {
 
     props[subprop][info.attribute] = value
   } else {
-    props[ctx.react && info.space ? info.property : info.attribute] = value
+    const reactAttribute = info.attribute.includes('-') ? info.attribute.split('-')
+      .map((val, i) => val = i === 0 ? val : val.charAt(0).toUpperCase() + val.slice(1))
+      .join('') : info.property
+    props[ctx.react && info.space ? reactAttribute : info.attribute] = value
   }
 }
 
