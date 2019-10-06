@@ -672,6 +672,47 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
+  t.test('should support mapping to React properties', function (st) {
+    var actual = toH(
+      r,
+      u(
+        'element',
+        {
+          tagName: 'svg',
+          properties: { xmlnsXLink: 'http://www.w3.org/1999/xlink' }
+        },
+        [
+          u(
+            'element',
+            {
+              tagName: 'line',
+              properties: { strokeDashArray: 4 }
+            }
+          )
+        ]
+      )
+    )
+    var expected = r(
+      'svg',
+      {
+        key: 'h-1',
+        xmlnsXlink: 'http://www.w3.org/1999/xlink'
+      },
+      [
+        r(
+          'line',
+          {
+            key: 'h-2',
+            strokeDasharray: 4
+          }
+        )
+      ]
+    )
+
+    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    st.end()
+  })
+
   t.end()
 })
 
