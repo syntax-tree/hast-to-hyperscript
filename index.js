@@ -3,6 +3,7 @@
 var html = require('property-information/html')
 var svg = require('property-information/svg')
 var find = require('property-information/find')
+var hastToReact = require('property-information/hast-to-react')
 var spaces = require('space-separated-tokens')
 var commas = require('comma-separated-tokens')
 var style = require('style-to-object')
@@ -193,7 +194,11 @@ function addAttribute(props, prop, value, ctx) {
 
     props[subprop][info.attribute] = value
   } else {
-    props[ctx.react && info.space ? info.property : info.attribute] = value
+    if (ctx.react && info.space) {
+      props[hastToReact[info.property] || info.property] = value
+    } else {
+      props[info.attribute] = value
+    }
   }
 }
 
