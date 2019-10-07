@@ -193,12 +193,10 @@ function addAttribute(props, prop, value, ctx) {
     }
 
     props[subprop][info.attribute] = value
+  } else if (ctx.react && info.space) {
+    props[hastToReact[info.property] || info.property] = value
   } else {
-    if (ctx.react && info.space) {
-      props[hastToReact[info.property] || info.property] = value
-    } else {
-      props[info.attribute] = value
-    }
+    props[info.attribute] = value
   }
 }
 

@@ -672,23 +672,20 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should support mapping to React properties', function (st) {
+  t.test('should support mapping to React properties', function(st) {
     var actual = toH(
       r,
       u(
         'element',
         {
           tagName: 'svg',
-          properties: { xmlnsXLink: 'http://www.w3.org/1999/xlink' }
+          properties: {xmlnsXLink: 'http://www.w3.org/1999/xlink'}
         },
         [
-          u(
-            'element',
-            {
-              tagName: 'line',
-              properties: { strokeDashArray: 4 }
-            }
-          )
+          u('element', {
+            tagName: 'line',
+            properties: {strokeDashArray: 4}
+          })
         ]
       )
     )
@@ -699,13 +696,10 @@ test('hast-to-hyperscript', function(t) {
         xmlnsXlink: 'http://www.w3.org/1999/xlink'
       },
       [
-        r(
-          'line',
-          {
-            key: 'h-2',
-            strokeDasharray: 4
-          }
-        )
+        r('line', {
+          key: 'h-2',
+          strokeDasharray: 4
+        })
       ]
     )
 
