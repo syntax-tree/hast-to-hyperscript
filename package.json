@@ -15,6 +15,10 @@
   ],
   "repository": "syntax-tree/hast-to-hyperscript",
   "bugs": "https://github.com/syntax-tree/hast-to-hyperscript/issues",
+  "funding": {
+     "type": "opencollective",
+     "url": "https://opencollective.com/unified"
+   },
   "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
   "contributors": [
     "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
