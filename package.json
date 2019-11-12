@@ -44,7 +44,7 @@
     "remark-preset-wooorm": "^6.0.0",
     "tape": "^4.0.0",
     "tinyify": "^2.0.0",
-    "unist-builder": "^1.0.0",
+    "unist-builder": "^2.0.0",
     "vdom-to-html": "^2.0.0",
     "virtual-dom": "^2.0.0",
     "vue": "^2.0.0",
