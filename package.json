@@ -1,6 +1,6 @@
 {
   "name": "hast-to-hyperscript",
-  "version": "7.0.4",
+  "version": "8.0.0",
   "description": "hast utility to transform to something else (react, vue, etc) through a hyperscript DSL",
   "license": "MIT",
   "keywords": [
