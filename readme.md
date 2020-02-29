@@ -19,7 +19,7 @@ a [hyperscript][] DSL.
 npm install hast-to-hyperscript
 ```
 
-## Usage
+## Use
 
 ```js
 var toH = require('hast-to-hyperscript')
@@ -100,7 +100,7 @@ Create an [*element*][element] from the given values.
 
 ###### Nodes
 
-Most Hyperscript implementations only support [*elements*][element] and
+Most hyperscript implementations only support [*elements*][element] and
 [*texts*][text].
 [**hast**][hast] supports [*doctype*][doctype], [*comment*][comment], and
 [*root*][root] as well.
@@ -139,7 +139,7 @@ Use [`hast-util-santize`][sanitize] to make the hast tree safe.
 ## Related
 
 *   [`hastscript`][hastscript] — Hyperscript compatible DSL for creating nodes
-*   [`hast-util-sanitize`][sanitize] — Sanitise nodes
+*   [`hast-util-sanitize`][sanitize] — Sanitize nodes
 
 ## Contribute
 
@@ -147,8 +147,8 @@ See [`contributing.md` in `syntax-tree/.github`][contributing] for ways to get
 started.
 See [`support.md`][support] for ways to get help.
 
-This project has a [Code of Conduct][coc].
-By interacting with this repository, organisation, or community you agree to
+This project has a [code of conduct][coc].
+By interacting with this repository, organization, or community you agree to
 abide by its terms.
 
 ## License
@@ -179,7 +179,7 @@ abide by its terms.
 
 [collective]: https://opencollective.com/unified
 
-[chat-badge]: https://img.shields.io/badge/join%20the%20community-on%20spectrum-7b16ff.svg
+[chat-badge]: https://img.shields.io/badge/chat-spectrum-7b16ff.svg
 
 [chat]: https://spectrum.chat/unified/syntax-tree
 
