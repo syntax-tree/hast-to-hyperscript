@@ -138,8 +138,16 @@ Use [`hast-util-santize`][sanitize] to make the hast tree safe.
 
 ## Related
 
-*   [`hastscript`][hastscript] — Hyperscript compatible DSL for creating nodes
-*   [`hast-util-sanitize`][sanitize] — Sanitize nodes
+*   [`hastscript`][hastscript]
+    — Hyperscript compatible DSL for creating nodes
+*   [`hast-util-sanitize`][sanitize]
+    — Sanitize nodes
+*   [`hast-util-from-dom`](https://github.com/syntax-tree/hast-util-from-dom)
+    — Transform a DOM tree to hast
+*   [`unist-builder`](https://github.com/syntax-tree/unist-builder)
+    — Create any unist tree
+*   [`xastscript`](https://github.com/syntax-tree/xastscript)
+    — Create a xast tree
 
 ## Contribute
 
