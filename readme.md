@@ -85,6 +85,11 @@ Transform a [**hast**][hast] [*tree*][tree] to something else through a
 
 Create an [*element*][element] from the given values.
 
+###### Content
+
+`h` is called with the node that is currently compiled as the context object
+(`this`).
+
 ###### Parameters
 
 *   `name` (`string`) — Tag-name of element to create
