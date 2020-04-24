@@ -16,29 +16,29 @@ var toH = require('.')
 
 var processor = rehype().data('settings', {fragment: true, position: false})
 
-test('hast-to-hyperscript', function(t) {
+test('hast-to-hyperscript', function (t) {
   var hast
 
   t.equal(typeof toH, 'function', 'should expose a function')
 
-  t.test('should throw if not given h', function(st) {
-    t.throws(function() {
+  t.test('should throw if not given h', function (st) {
+    t.throws(function () {
       toH(null, u('element'))
     }, /h is not a function/)
 
     st.end()
   })
 
-  t.test('should throw if not given a node', function(st) {
-    t.throws(function() {
+  t.test('should throw if not given a node', function (st) {
+    t.throws(function () {
       toH(h)
     }, /Expected root or element, not `undefined`/)
 
-    t.throws(function() {
+    t.throws(function () {
       toH(h, u('text', 'Alpha'))
     }, /Error: Expected root or element, not `text`/)
 
-    t.throws(function() {
+    t.throws(function () {
       toH(h, u('text', 'value'))
     }, /Expected root or element/)
 
@@ -147,7 +147,7 @@ test('hast-to-hyperscript', function(t) {
     '</div>'
   ].join('')
 
-  t.test('should support `hyperscript`', function(st) {
+  t.test('should support `hyperscript`', function (st) {
     // `hyperscript` does not support SVG (camelcased props).
     var baseline = doc.replace(/viewBox/, 'viewbox')
     var actual = toH(h, hast)
@@ -185,7 +185,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should support `virtual-dom/h`', function(st) {
+  t.test('should support `virtual-dom/h`', function (st) {
     var baseline = doc.replace(/color:red;/, 'color: red')
     var actual = toH(v, hast)
     var expected = v('div', {key: 'h-1'}, [
@@ -253,7 +253,9 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should support `React.createElement` in `development`', function(st) {
+  t.test('should support `React.createElement` in `development`', function (
+    st
+  ) {
     var currentEnv = process.env.NODE_ENV
     var baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'development'
@@ -321,7 +323,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should support `React.createElement` in `production`', function(st) {
+  t.test('should support `React.createElement` in `production`', function (st) {
     var currentEnv = process.env.NODE_ENV
     var baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'production'
@@ -388,7 +390,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should support `Vue`', function(st) {
+  t.test('should support `Vue`', function (st) {
     var baseline = doc.replace(/<div>/, '<div data-server-rendered="true">')
     var actual
     var expected
@@ -396,7 +398,7 @@ test('hast-to-hyperscript', function(t) {
     st.plan(3)
 
     Promise.all([vueToString(actualRender), vueToString(expectedRender)])
-      .then(function(all) {
+      .then(function (all) {
         var actualString = all[0]
         var expectedString = all[0]
 
@@ -409,7 +411,7 @@ test('hast-to-hyperscript', function(t) {
           'equal output baseline'
         )
       })
-      .catch(function(error) {
+      .catch(function (error) {
         st.ifErr(error, 'did not expect an error')
       })
 
@@ -501,7 +503,7 @@ test('hast-to-hyperscript', function(t) {
     }
   })
 
-  t.test('should support keys', function(st) {
+  t.test('should support keys', function (st) {
     st.equal(
       toH(h, u('element', {tagName: 'div'})).key,
       undefined,
@@ -561,7 +563,7 @@ test('hast-to-hyperscript', function(t) {
     )
 
     st.throws(
-      function() {
+      function () {
         toH(
           r,
           u('element', {
@@ -570,7 +572,7 @@ test('hast-to-hyperscript', function(t) {
           })
         )
       },
-      /^Error: div\[style\]:1:12: End of comment missing$/,
+      /^Error: div\[style]:1:12: End of comment missing$/,
       'react: should ignore invalid style declarations'
     )
 
@@ -601,7 +603,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should support space', function(st) {
+  t.test('should support space', function (st) {
     st.equal(
       toH(v, u('element', {tagName: 'div'})).namespace,
       null,
@@ -623,7 +625,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('flattens a `root` with one element to that child', function(st) {
+  t.test('flattens a `root` with one element to that child', function (st) {
     var actual = toH(
       h,
       u('root', [u('element', {tagName: 'h1', properties: {id: 'a'}}, [])])
@@ -636,7 +638,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('flattens a `root` without children to a `div`', function(st) {
+  t.test('flattens a `root` without children to a `div`', function (st) {
     var actual = toH(h, u('root', []))
     var expected = h('div')
     var doc = '<div></div>'
@@ -646,7 +648,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('flattens a `root` with a text child to a `div`', function(st) {
+  t.test('flattens a `root` with a text child to a `div`', function (st) {
     var actual = toH(h, u('root', [u('text', 'Alpha')]))
     var expected = h('div', 'Alpha')
     var doc = '<div>Alpha</div>'
@@ -656,7 +658,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('flattens a `root` with more children to a `div`', function(st) {
+  t.test('flattens a `root` with more children to a `div`', function (st) {
     var actual = toH(
       h,
       u('root', [
@@ -672,7 +674,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should support mapping to React properties', function(st) {
+  t.test('should support mapping to React properties', function (st) {
     var actual = toH(
       r,
       u(
@@ -707,7 +709,7 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
-  t.test('should use a node as a rendering context', function(st) {
+  t.test('should use a node as a rendering context', function (st) {
     function mockR() {
       return {
         node: this

@@ -243,12 +243,12 @@ function parseStyle(value, tagName) {
   }
 }
 
-function styleCase(val) {
-  if (val.slice(0, 4) === '-ms-') {
-    val = 'ms-' + val.slice(4)
+function styleCase(value) {
+  if (value.slice(0, 4) === '-ms-') {
+    value = 'ms-' + value.slice(4)
   }
 
-  return val.replace(dashes, styleReplacer)
+  return value.replace(dashes, styleReplacer)
 }
 
 function styleReplacer($0, $1) {
