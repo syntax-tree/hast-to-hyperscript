@@ -707,6 +707,32 @@ test('hast-to-hyperscript', function(t) {
     st.end()
   })
 
+  t.test('should use a node as a rendering context', function(st) {
+    function mockR() {
+      return {
+        node: this
+      }
+    }
+
+    var node = u(
+      'element',
+      {
+        tagName: 'svg',
+        properties: {xmlnsXLink: 'http://www.w3.org/1999/xlink'}
+      },
+      [
+        u('element', {
+          tagName: 'line',
+          properties: {strokeDashArray: 4}
+        })
+      ]
+    )
+    var actual = toH(mockR, node)
+
+    st.equal(actual.node, node, 'equal rendering context')
+    st.end()
+  })
+
   t.end()
 })
 

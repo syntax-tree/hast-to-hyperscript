@@ -138,7 +138,9 @@ function toH(h, node, ctx) {
   // Ensure no React warnings are triggered for void elements having children
   // passed in.
   result =
-    elements.length === 0 ? h(name, attributes) : h(name, attributes, elements)
+    elements.length === 0
+      ? h.call(node, name, attributes)
+      : h.call(node, name, attributes, elements)
 
   // Restore parent schema.
   ctx.schema = parentSchema
