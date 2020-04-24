@@ -154,7 +154,7 @@ function addAttribute(props, prop, value, ctx) {
   var info = find(schema, prop)
   var subprop
 
-  // Ignore nully and `NaN` values.
+  // Ignore nullish and `NaN` values.
   // Ignore `false` and falsey known booleans for hyperlike DSLs.
   if (
     value === null ||
