@@ -35,9 +35,8 @@ hastToHyperScript(hyperscriptCreateElement, element, {
 })
 
 // Try different types of renderers
-hastToHyperScript(reactCreateElement, element)
-hastToHyperScript(virtualDomCreateElement, element)
-hastToHyperScript(hyperscriptCreateElement, element)
-hastToHyperScript(new Vue().$createElement, element)
-// $ExpectError
-hastToHyperScript((name: number) => name, element)
+hastToHyperScript(hyperscriptCreateElement, element) // $ExpectType Element
+hastToHyperScript(reactCreateElement, element) // $ExpectType ReactElement<{}, string | ((props: any) => ReactElement<any, string | any | (new (props: any) => Component<any, any, any>)> | null) | (new (props: any) => Component<any, any, any>)>
+hastToHyperScript(virtualDomCreateElement, element) // $ExpectType VNode
+hastToHyperScript(new Vue().$createElement, element) // $ExpectType VNode
+hastToHyperScript((name: number) => name, element) // $ExpectError
