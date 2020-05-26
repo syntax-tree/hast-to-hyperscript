@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "comma-separated-tokens": "^1.0.0",
-    "property-information": "^5.0.0",
+    "property-information": "^5.3.0",
     "space-separated-tokens": "^1.0.0",
     "style-to-object": "^0.3.0",
     "unist-util-is": "^4.0.0",
