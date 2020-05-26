@@ -21,15 +21,15 @@ test('hast-to-hyperscript', function (t) {
 
   t.equal(typeof toH, 'function', 'should expose a function')
 
-  t.test('should throw if not given h', function (st) {
+  t.test('should throw if not given h', function (t) {
     t.throws(function () {
       toH(null, u('element'))
     }, /h is not a function/)
 
-    st.end()
+    t.end()
   })
 
-  t.test('should throw if not given a node', function (st) {
+  t.test('should throw if not given a node', function (t) {
     t.throws(function () {
       toH(h)
     }, /Expected root or element, not `undefined`/)
@@ -42,7 +42,7 @@ test('hast-to-hyperscript', function (t) {
       toH(h, u('text', 'value'))
     }, /Expected root or element/)
 
-    st.end()
+    t.end()
   })
 
   hast = u('root', [
@@ -147,7 +147,7 @@ test('hast-to-hyperscript', function (t) {
     '</div>'
   ].join('')
 
-  t.test('should support `hyperscript`', function (st) {
+  t.test('should support `hyperscript`', function (t) {
     // `hyperscript` does not support SVG (camelcased props).
     var baseline = doc.replace(/viewBox/, 'viewbox')
     var actual = toH(h, hast)
@@ -174,18 +174,18 @@ test('hast-to-hyperscript', function (t) {
       )
     ])
 
-    st.deepEqual(html(actual.outerHTML), html(baseline), 'equal output')
+    t.deepEqual(html(actual.outerHTML), html(baseline), 'equal output')
 
-    st.deepEqual(
+    t.deepEqual(
       html(expected.outerHTML),
       html(baseline),
       'equal output baseline'
     )
 
-    st.end()
+    t.end()
   })
 
-  t.test('should support `virtual-dom/h`', function (st) {
+  t.test('should support `virtual-dom/h`', function (t) {
     var baseline = doc.replace(/color:red;/, 'color: red')
     var actual = toH(v, hast)
     var expected = v('div', {key: 'h-1'}, [
@@ -240,22 +240,20 @@ test('hast-to-hyperscript', function (t) {
       )
     ])
 
-    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
 
-    st.deepEqual(html(vToString(actual)), html(baseline), 'equal output')
+    t.deepEqual(html(vToString(actual)), html(baseline), 'equal output')
 
-    st.deepEqual(
+    t.deepEqual(
       html(vToString(expected)),
       html(baseline),
       'equal output baseline'
     )
 
-    st.end()
+    t.end()
   })
 
-  t.test('should support `React.createElement` in `development`', function (
-    st
-  ) {
+  t.test('should support `React.createElement` in `development`', function (t) {
     var currentEnv = process.env.NODE_ENV
     var baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'development'
@@ -308,11 +306,11 @@ test('hast-to-hyperscript', function (t) {
       )
     )
 
-    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
 
-    st.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
+    t.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
 
-    st.deepEqual(
+    t.deepEqual(
       html(rToString(expected)),
       html(baseline),
       'equal output baseline'
@@ -320,10 +318,10 @@ test('hast-to-hyperscript', function (t) {
 
     process.env.NODE_ENV = currentEnv
 
-    st.end()
+    t.end()
   })
 
-  t.test('should support `React.createElement` in `production`', function (st) {
+  t.test('should support `React.createElement` in `production`', function (t) {
     var currentEnv = process.env.NODE_ENV
     var baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'production'
@@ -376,43 +374,43 @@ test('hast-to-hyperscript', function (t) {
       )
     )
 
-    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
 
-    st.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
+    t.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
 
-    st.deepEqual(
+    t.deepEqual(
       html(rToString(expected)),
       html(baseline),
       'equal output baseline'
     )
 
     process.env.NODE_ENV = currentEnv
-    st.end()
+    t.end()
   })
 
-  t.test('should support `Vue`', function (st) {
+  t.test('should support `Vue`', function (t) {
     var baseline = doc.replace(/<div>/, '<div data-server-rendered="true">')
     var actual
     var expected
 
-    st.plan(3)
+    t.plan(3)
 
     Promise.all([vueToString(actualRender), vueToString(expectedRender)])
       .then(function (all) {
         var actualString = all[0]
         var expectedString = all[0]
 
-        st.deepEqual(clean(actual), clean(expected), 'equal syntax trees')
-        st.deepEqual(html(actualString), html(baseline), 'equal output')
+        t.deepEqual(clean(actual), clean(expected), 'equal syntax trees')
+        t.deepEqual(html(actualString), html(baseline), 'equal output')
 
-        st.deepEqual(
+        t.deepEqual(
           html(expectedString),
           html(baseline),
           'equal output baseline'
         )
       })
       .catch(function (error) {
-        st.ifErr(error, 'did not expect an error')
+        t.ifErr(error, 'did not expect an error')
       })
 
     function actualRender(h) {
@@ -503,46 +501,46 @@ test('hast-to-hyperscript', function (t) {
     }
   })
 
-  t.test('should support keys', function (st) {
-    st.equal(
+  t.test('should support keys', function (t) {
+    t.equal(
       toH(h, u('element', {tagName: 'div'})).key,
       undefined,
       'should not patch `keys` normally'
     )
 
-    st.equal(
+    t.equal(
       toH(h, u('element', {tagName: 'div'}), 'prefix-').key,
       'prefix-1',
       'should patch `keys` when given'
     )
 
-    st.equal(
+    t.equal(
       toH(v, u('element', {tagName: 'div'})).key,
       'h-1',
       'should patch `keys` on vdom'
     )
 
-    st.equal(
+    t.equal(
       toH(r, u('element', {tagName: 'div'})).key,
       'h-1',
       'should patch `keys` on react'
     )
 
-    st.deepEqual(
+    t.deepEqual(
       toH(v, u('element', {tagName: 'div', properties: {style: 'color: red'}}))
         .properties.attributes.style,
       'color: red',
       'vdom: should patch a style declaration correctly'
     )
 
-    st.deepEqual(
+    t.deepEqual(
       toH(r, u('element', {tagName: 'div', properties: {style: 'color: red'}}))
         .props.style,
       {color: 'red'},
       'react: should parse a style declaration'
     )
 
-    st.deepEqual(
+    t.deepEqual(
       toH(
         r,
         u('element', {
@@ -562,7 +560,7 @@ test('hast-to-hyperscript', function (t) {
       'react: should parse vendor prefixed in style declarations'
     )
 
-    st.throws(
+    t.throws(
       function () {
         toH(
           r,
@@ -576,7 +574,7 @@ test('hast-to-hyperscript', function (t) {
       'react: should ignore invalid style declarations'
     )
 
-    st.deepEqual(
+    t.deepEqual(
       toH(
         r,
         u('element', {
@@ -600,32 +598,32 @@ test('hast-to-hyperscript', function (t) {
       'react: should transform unknown props to camelCase except for data and aria'
     )
 
-    st.end()
+    t.end()
   })
 
-  t.test('should support space', function (st) {
-    st.equal(
+  t.test('should support space', function (t) {
+    t.equal(
       toH(v, u('element', {tagName: 'div'})).namespace,
       null,
       'should start in HTML'
     )
 
-    st.equal(
+    t.equal(
       toH(v, u('element', {tagName: 'div'}), {space: 'svg'}).namespace,
       namespaces.svg,
       'should support `space: "svg"`'
     )
 
-    st.equal(
+    t.equal(
       toH(v, u('element', {tagName: 'svg'})).namespace,
       namespaces.svg,
       'should infer `space: "svg"`'
     )
 
-    st.end()
+    t.end()
   })
 
-  t.test('flattens a `root` with one element to that child', function (st) {
+  t.test('flattens a `root` with one element to that child', function (t) {
     var actual = toH(
       h,
       u('root', [u('element', {tagName: 'h1', properties: {id: 'a'}}, [])])
@@ -633,32 +631,32 @@ test('hast-to-hyperscript', function (t) {
     var expected = h('h1#a')
     var doc = '<h1 id="a"></h1>'
 
-    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    st.end()
+    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
+    t.end()
   })
 
-  t.test('flattens a `root` without children to a `div`', function (st) {
+  t.test('flattens a `root` without children to a `div`', function (t) {
     var actual = toH(h, u('root', []))
     var expected = h('div')
     var doc = '<div></div>'
 
-    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    st.end()
+    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
+    t.end()
   })
 
-  t.test('flattens a `root` with a text child to a `div`', function (st) {
+  t.test('flattens a `root` with a text child to a `div`', function (t) {
     var actual = toH(h, u('root', [u('text', 'Alpha')]))
     var expected = h('div', 'Alpha')
     var doc = '<div>Alpha</div>'
 
-    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    st.end()
+    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
+    t.end()
   })
 
-  t.test('flattens a `root` with more children to a `div`', function (st) {
+  t.test('flattens a `root` with more children to a `div`', function (t) {
     var actual = toH(
       h,
       u('root', [
@@ -669,12 +667,12 @@ test('hast-to-hyperscript', function (t) {
     var expected = h('div', [h('h1', 'Alpha'), h('p', 'Bravo')])
     var doc = '<div><h1>Alpha</h1><p>Bravo</p></div>'
 
-    st.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    st.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    st.end()
+    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
+    t.end()
   })
 
-  t.test('should support mapping to React properties', function (st) {
+  t.test('should support mapping to React properties', function (t) {
     var actual = toH(
       r,
       u(
@@ -705,11 +703,11 @@ test('hast-to-hyperscript', function (t) {
       ]
     )
 
-    st.deepEqual(json(actual), json(expected), 'equal syntax trees')
-    st.end()
+    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    t.end()
   })
 
-  t.test('should use a node as a rendering context', function (st) {
+  t.test('should use a node as a rendering context', function (t) {
     function mockR() {
       return {
         node: this
@@ -731,8 +729,8 @@ test('hast-to-hyperscript', function (t) {
     )
     var actual = toH(mockR, node)
 
-    st.equal(actual.node, node, 'equal rendering context')
-    st.end()
+    t.equal(actual.node, node, 'equal rendering context')
+    t.end()
   })
 
   t.end()

@@ -22,9 +22,9 @@
   "repository": "syntax-tree/hast-to-hyperscript",
   "bugs": "https://github.com/syntax-tree/hast-to-hyperscript/issues",
   "funding": {
-     "type": "opencollective",
-     "url": "https://opencollective.com/unified"
-   },
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
   "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
   "contributors": [
     "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
@@ -52,14 +52,14 @@
     "rehype": "^10.0.0",
     "remark-cli": "^8.0.0",
     "remark-preset-wooorm": "^7.0.0",
-    "tape": "^4.0.0",
+    "tape": "^5.0.0",
     "tinyify": "^2.0.0",
     "unist-builder": "^2.0.0",
     "vdom-to-html": "^2.0.0",
     "virtual-dom": "^2.0.0",
     "vue": "^2.0.0",
     "vue-server-renderer": "^2.0.0",
-    "xo": "^0.29.0"
+    "xo": "^0.30.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier --write \"**/*.js\" && xo --fix",
@@ -88,6 +88,7 @@
     "prettier": true,
     "esnext": false,
     "rules": {
+      "unicorn/no-fn-reference-in-iterator": "off",
       "unicorn/prefer-type-error": "off",
       "guard-for-in": "off",
       "no-self-compare": "off",
