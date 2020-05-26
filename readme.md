@@ -9,7 +9,7 @@
 [![Chat][chat-badge]][chat]
 
 [**hast**][hast] utility to transform a [*tree*][tree] to something else through
-a [hyperscript][] DSL.
+a [hyperscript][] interface.
 
 ## Install
 
@@ -41,7 +41,7 @@ var tree = {
   ]
 }
 
-// Transform (`hyperscript` needs `outerHTML` to stringify):
+// Transform (`hyperscript` needs `outerHTML` to serialize):
 var doc = toH(h, tree).outerHTML
 
 console.log(doc)
@@ -58,7 +58,7 @@ Yields:
 ### `toH(h, tree[, options|prefix])`
 
 Transform a [**hast**][hast] [*tree*][tree] to something else through a
-[hyperscript][] DSL.
+[hyperscript][] interface.
 
 ###### Parameters
 
@@ -67,7 +67,7 @@ Transform a [**hast**][hast] [*tree*][tree] to something else through a
 *   `prefix` — Treated as `{prefix: prefix}`
 *   `options.prefix` (`string` or `boolean`, optional)
     — Prefix to use as a prefix for keys passed in `attrs` to `h()`,
-    this behaviour is turned off by passing `false`, turned on by passing
+    this behavior is turned off by passing `false`, turned on by passing
     a `string`.
     By default, `h-` is used as a prefix if the given `h` is detected as being
     `virtual-dom/h` or `React.createElement`
@@ -144,7 +144,7 @@ Use [`hast-util-santize`][sanitize] to make the hast tree safe.
 ## Related
 
 *   [`hastscript`][hastscript]
-    — Hyperscript compatible DSL for creating nodes
+    — Hyperscript compatible interface for creating nodes
 *   [`hast-util-sanitize`][sanitize]
     — Sanitize nodes
 *   [`hast-util-from-dom`](https://github.com/syntax-tree/hast-util-from-dom)
