@@ -45,16 +45,15 @@ function wrapper(h, node, options) {
   }
 
   if (root(node)) {
-    if (node.children.length === 1 && element(node.children[0])) {
-      node = node.children[0]
-    } else {
-      node = {
-        type: 'element',
-        tagName: 'div',
-        properties: {},
-        children: node.children
-      }
-    }
+    node =
+      node.children.length === 1 && element(node.children[0])
+        ? node.children[0]
+        : {
+            type: 'element',
+            tagName: 'div',
+            properties: {},
+            children: node.children
+          }
   } else if (!element(node)) {
     throw new Error(
       'Expected root or element, not `' + ((node && node.type) || node) + '`'
