@@ -139,7 +139,7 @@ time.
 
 Use of `hast-to-hyperscript` can open you up to a
 [cross-site scripting (XSS)][xss] attack if the hast tree is unsafe.
-Use [`hast-util-santize`][sanitize] to make the hast tree safe.
+Use [`hast-util-sanitize`][sanitize] to make the hast tree safe.
 
 ## Related
 
