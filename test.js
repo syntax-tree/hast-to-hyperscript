@@ -186,7 +186,7 @@ test('hast-to-hyperscript', function (t) {
   })
 
   t.test('should support `virtual-dom/h`', function (t) {
-    var baseline = doc.replace(/color:red;/, 'color: red')
+    var baseline = doc.replace(/color:red;/, 'color: red;')
     var actual = toH(v, hast)
     var expected = v('div', {key: 'h-1'}, [
       v(
@@ -201,13 +201,15 @@ test('hast-to-hyperscript', function (t) {
             'strong',
             {
               key: 'h-3',
+              style: {
+                color: 'red'
+              },
               attributes: {
                 'aria-valuenow': '1',
                 foo: 'bar',
                 camelCase: 'on off',
                 'data-123': '456',
-                'data-some': 'yes',
-                style: 'color: red'
+                'data-some': 'yes'
               }
             },
             'charlie'
@@ -478,16 +480,6 @@ test('hast-to-hyperscript', function (t) {
       return expected
     }
 
-    function identity(value) {
-      return value
-    }
-
-    function vueToString(render) {
-      return VueSSR.createRenderer({template: identity}).renderToString(
-        new Vue({render: render}).$mount()
-      )
-    }
-
     function clean(node) {
       remove(node)
       return json(node)
@@ -526,11 +518,23 @@ test('hast-to-hyperscript', function (t) {
       'should patch `keys` on react'
     )
 
+    t.end()
+  })
+
+  t.test('should support style and other funky props', function (t) {
     t.deepEqual(
-      toH(v, u('element', {tagName: 'div', properties: {style: 'color: red'}}))
-        .properties.attributes.style,
-      'color: red',
+      vToString(
+        toH(v, u('element', {tagName: 'div', properties: {style: 'color:red'}}))
+      ),
+      '<div style="color: red;"></div>',
       'vdom: should patch a style declaration correctly'
+    )
+
+    t.deepEqual(
+      toH(h, u('element', {tagName: 'div', properties: {style: 'color: red'}}))
+        .outerHTML,
+      '<div style="color:red;"></div>',
+      'hyperscript: should parse a style declaration'
     )
 
     t.deepEqual(
@@ -742,4 +746,14 @@ function html(doc) {
 
 function json(value) {
   return JSON.parse(JSON.stringify(value))
+}
+
+function vueToString(render) {
+  return VueSSR.createRenderer({template: identity}).renderToString(
+    new Vue({render: render}).$mount()
+  )
+}
+
+function identity(value) {
+  return value
 }
