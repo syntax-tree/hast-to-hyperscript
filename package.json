@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@types/hyperscript": "0.0.4",
-    "@types/react": "^16.0.0",
+    "@types/react": "^17.0.0",
     "@types/virtual-dom": "^2.0.0",
     "browserify": "^17.0.0",
     "dtslint": "^4.0.0",
@@ -67,12 +67,12 @@
     "virtual-dom": "^2.0.0",
     "vue": "^2.0.0",
     "vue-server-renderer": "^2.0.0",
-    "xo": "^0.34.0"
+    "xo": "^0.35.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
-    "build-bundle": "browserify index.js -s hastToHyperscript > hast-to-hyperscript.js",
-    "build-mangle": "browserify index.js -s hastToHyperscript -p tinyify > hast-to-hyperscript.min.js",
+    "build-bundle": "browserify index.js -s hastToHyperscript -o hast-to-hyperscript.js",
+    "build-mangle": "browserify index.js -s hastToHyperscript -o hast-to-hyperscript.min.js -p tinyify",
     "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test.js",
