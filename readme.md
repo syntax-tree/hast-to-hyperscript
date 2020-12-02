@@ -170,9 +170,9 @@ abide by its terms.
 
 <!-- Definitions -->
 
-[build-badge]: https://img.shields.io/travis/syntax-tree/hast-to-hyperscript.svg
+[build-badge]: https://github.com/syntax-tree/hast-to-hyperscript/workflows/main/badge.svg
 
-[build]: https://travis-ci.org/syntax-tree/hast-to-hyperscript
+[build]: https://github.com/syntax-tree/hast-to-hyperscript/actions
 
 [coverage-badge]: https://img.shields.io/codecov/c/github/syntax-tree/hast-to-hyperscript.svg
 
