@@ -486,9 +486,12 @@ test('hast-to-hyperscript', function (t) {
     }
 
     function remove(node) {
+      var index = -1
       delete node.context
       if (node.children) {
-        node.children.forEach(remove)
+        while (++index < node.children.length) {
+          remove(node.children[index])
+        }
       }
     }
   })
