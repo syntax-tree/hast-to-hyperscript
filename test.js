@@ -1,18 +1,16 @@
-'use strict'
-
-var test = require('tape')
-var namespaces = require('web-namespaces')
-var u = require('unist-builder')
-var h = require('hyperscript')
-var v = require('virtual-dom/h')
-var vs = require('virtual-dom/virtual-hyperscript/svg')
-var r = require('react').createElement
-var rehype = require('rehype')
-var vToString = require('vdom-to-html')
-var rToString = require('react-dom/server').renderToStaticMarkup
-var Vue = require('vue')
-var VueSSR = require('vue-server-renderer')
-var toH = require('.')
+import test from 'tape'
+import {webNamespaces as ns} from 'web-namespaces'
+import {u} from 'unist-builder'
+import h from 'hyperscript'
+import v from 'virtual-dom/h.js'
+import vs from 'virtual-dom/virtual-hyperscript/svg.js'
+import rehype from 'rehype'
+import vToString from 'vdom-to-html'
+import {createElement as r} from 'react'
+import {renderToStaticMarkup as rToString} from 'react-dom/server.js'
+import Vue from 'vue'
+import VueSSR from 'vue-server-renderer'
+import {toH} from './index.js'
 
 var processor = rehype().data('settings', {fragment: true, position: false})
 
@@ -226,7 +224,7 @@ test('hast-to-hyperscript', function (t) {
         'svg',
         {
           key: 'h-5',
-          namespace: namespaces.svg,
+          namespace: ns.svg,
           attributes: {
             xmlns: 'http://www.w3.org/2000/svg',
             viewBox: '0 0 500 500'
@@ -235,7 +233,7 @@ test('hast-to-hyperscript', function (t) {
         [
           vs('circle', {
             key: 'h-6',
-            namespace: namespaces.svg,
+            namespace: ns.svg,
             attributes: {cx: 120, cy: 120, r: 100}
           })
         ]
@@ -617,13 +615,13 @@ test('hast-to-hyperscript', function (t) {
 
     t.equal(
       toH(v, u('element', {tagName: 'div'}), {space: 'svg'}).namespace,
-      namespaces.svg,
+      ns.svg,
       'should support `space: "svg"`'
     )
 
     t.equal(
       toH(v, u('element', {tagName: 'svg'})).namespace,
-      namespaces.svg,
+      ns.svg,
       'should infer `space: "svg"`'
     )
 
@@ -753,7 +751,7 @@ function json(value) {
 
 function vueToString(render) {
   return VueSSR.createRenderer({template: identity}).renderToString(
-    new Vue({render: render}).$mount()
+    new Vue({render}).$mount()
   )
 }
 

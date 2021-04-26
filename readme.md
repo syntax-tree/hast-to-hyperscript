@@ -13,6 +13,9 @@ a [hyperscript][] interface.
 
 ## Install
 
+This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
+Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
+
 [npm][]:
 
 ```sh
@@ -22,8 +25,8 @@ npm install hast-to-hyperscript
 ## Use
 
 ```js
-var toH = require('hast-to-hyperscript')
-var h = require('hyperscript')
+import {toH} from 'hast-to-hyperscript'
+import h from 'hyperscript'
 
 var tree = {
   type: 'element',
@@ -54,6 +57,9 @@ Yields:
 ```
 
 ## API
+
+This package exports the following identifiers: `toH`.
+There is no default export.
 
 ### `toH(h, tree[, options|prefix])`
 
