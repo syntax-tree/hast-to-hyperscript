@@ -1,8 +1,15 @@
+/**
+ * @typedef {import('hast').Element} HastElement
+ * @typedef {import('hast').Root} HastRoot
+ * @typedef {import('vue').CreateElement} VueCreateElement
+ * @typedef {import('vue').VNode} VueNode
+ */
+
 import test from 'tape'
 import {webNamespaces as ns} from 'web-namespaces'
 import {u} from 'unist-builder'
 import h from 'hyperscript'
-import v from 'virtual-dom/h.js'
+import {h as v} from 'virtual-dom'
 import vs from 'virtual-dom/virtual-hyperscript/svg.js'
 import rehype from 'rehype'
 import vToString from 'vdom-to-html'
@@ -15,13 +22,14 @@ import {toH} from './index.js'
 var processor = rehype().data('settings', {fragment: true, position: false})
 
 test('hast-to-hyperscript', function (t) {
+  /** @type {HastRoot|HastElement} */
   var hast
 
   t.equal(typeof toH, 'function', 'should expose a function')
 
   t.test('should throw if not given h', function (t) {
     t.throws(function () {
-      toH(null, u('element'))
+      toH(null, u('element', {tagName: ''}, []))
     }, /h is not a function/)
 
     t.end()
@@ -29,14 +37,17 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should throw if not given a node', function (t) {
     t.throws(function () {
+      // @ts-ignore runtime.
       toH(h)
     }, /Expected root or element, not `undefined`/)
 
     t.throws(function () {
+      // @ts-ignore runtime.
       toH(h, u('text', 'Alpha'))
     }, /Error: Expected root or element, not `text`/)
 
     t.throws(function () {
+      // @ts-ignore runtime.
       toH(h, u('text', 'value'))
     }, /Expected root or element/)
 
@@ -172,6 +183,7 @@ test('hast-to-hyperscript', function (t) {
       )
     ])
 
+    // @ts-ignore `outerHTML` definitely does exist.
     t.deepEqual(html(actual.outerHTML), html(baseline), 'equal output')
 
     t.deepEqual(
@@ -191,6 +203,7 @@ test('hast-to-hyperscript', function (t) {
         'h1',
         {
           key: 'h-2',
+          // @ts-ignore Works fine.
           attributes: {id: 'a', class: 'b c', hidden: true, height: 2}
         },
         [
@@ -199,9 +212,7 @@ test('hast-to-hyperscript', function (t) {
             'strong',
             {
               key: 'h-3',
-              style: {
-                color: 'red'
-              },
+              style: {color: 'red'},
               attributes: {
                 'aria-valuenow': '1',
                 foo: 'bar',
@@ -213,11 +224,15 @@ test('hast-to-hyperscript', function (t) {
             'charlie'
           ),
           ' delta',
-          v('input', {
-            key: 'h-4',
-            checked: true,
-            attributes: {type: 'file', accept: '.jpg, .jpeg'}
-          })
+          v(
+            'input',
+            {
+              key: 'h-4',
+              checked: true,
+              attributes: {type: 'file', accept: '.jpg, .jpeg'}
+            },
+            []
+          )
         ]
       ),
       vs(
@@ -390,7 +405,9 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support `Vue`', function (t) {
     var baseline = doc.replace(/<div>/, '<div data-server-rendered="true">')
+    /** @type {VueNode} */
     var actual
+    /** @type {VueNode} */
     var expected
 
     t.plan(3)
@@ -409,15 +426,19 @@ test('hast-to-hyperscript', function (t) {
           'equal output baseline'
         )
       })
-      .catch(function (error) {
-        t.ifErr(error, 'did not expect an error')
-      })
+      .catch(
+        /** @param {Error} error */ function (error) {
+          t.ifErr(error, 'did not expect an error')
+        }
+      )
 
+    /** @param {import('vue').CreateElement} h */
     function actualRender(h) {
       actual = toH(h, hast)
       return actual
     }
 
+    /** @param {import('vue').CreateElement} h */
     function expectedRender(h) {
       expected = h(
         'div',
@@ -478,11 +499,18 @@ test('hast-to-hyperscript', function (t) {
       return expected
     }
 
+    /**
+     * @param {VueNode} node
+     * @returns {unknown}
+     */
     function clean(node) {
       remove(node)
       return json(node)
     }
 
+    /**
+     * @param {VueNode} node
+     */
     function remove(node) {
       var index = -1
       delete node.context
@@ -496,25 +524,43 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support keys', function (t) {
     t.equal(
-      toH(h, u('element', {tagName: 'div'})).key,
+      // @ts-ignore Types are wrong.
+      toH(h, u('element', {tagName: 'div'}, [])).key,
       undefined,
       'should not patch `keys` normally'
     )
 
     t.equal(
-      toH(h, u('element', {tagName: 'div'}), 'prefix-').key,
+      // @ts-ignore Types are wrong.
+      toH(h, u('element', {tagName: 'div'}, []), 'prefix-').key,
       'prefix-1',
       'should patch `keys` when given'
     )
 
     t.equal(
-      toH(v, u('element', {tagName: 'div'})).key,
+      // @ts-ignore Types are wrong.
+      toH(h, u('element', {tagName: 'div'}, []), true).key,
+      'h-1',
+      'should patch `keys` when `true`'
+    )
+
+    t.equal(
+      // @ts-ignore Types are wrong.
+      toH(h, u('element', {tagName: 'div'}, []), false).key,
+      undefined,
+      'should not patch `keys` when `false`'
+    )
+
+    t.equal(
+      // @ts-ignore Types are wrong.
+      toH(v, u('element', {tagName: 'div'}, [])).key,
       'h-1',
       'should patch `keys` on vdom'
     )
 
     t.equal(
-      toH(r, u('element', {tagName: 'div'})).key,
+      // @ts-ignore Types are wrong.
+      toH(r, u('element', {tagName: 'div'}, [])).key,
       'h-1',
       'should patch `keys` on react'
     )
@@ -525,42 +571,56 @@ test('hast-to-hyperscript', function (t) {
   t.test('should support style and other funky props', function (t) {
     t.deepEqual(
       vToString(
-        toH(v, u('element', {tagName: 'div', properties: {style: 'color:red'}}))
+        toH(
+          v,
+          u('element', {tagName: 'div', properties: {style: 'color:red'}}, [])
+        )
       ),
       '<div style="color: red;"></div>',
       'vdom: should patch a style declaration correctly'
     )
 
     t.deepEqual(
-      toH(h, u('element', {tagName: 'div', properties: {style: 'color: red'}}))
-        .outerHTML,
+      toH(
+        h,
+        u('element', {tagName: 'div', properties: {style: 'color: red'}}, [])
+        // @ts-ignore Types are wrong.
+      ).outerHTML,
       '<div style="color:red;"></div>',
       'hyperscript: should parse a style declaration'
     )
 
     t.deepEqual(
-      toH(r, u('element', {tagName: 'div', properties: {style: 'color: red'}}))
-        .props.style,
-      {color: 'red'},
+      toH(
+        r,
+        u('element', {tagName: 'div', properties: {style: 'color: red'}}, [])
+      ).props,
+      {style: {color: 'red'}},
       'react: should parse a style declaration'
     )
 
     t.deepEqual(
       toH(
         r,
-        u('element', {
-          tagName: 'div',
-          properties: {
-            style:
-              'color: red; background-color: blue; -moz-transition: initial; -ms-transition: unset'
-          }
-        })
-      ).props.style,
+        u(
+          'element',
+          {
+            tagName: 'div',
+            properties: {
+              style:
+                'color: red; background-color: blue; -moz-transition: initial; -ms-transition: unset'
+            }
+          },
+          []
+        )
+      ).props,
       {
-        color: 'red',
-        backgroundColor: 'blue',
-        msTransition: 'unset',
-        MozTransition: 'initial'
+        style: {
+          color: 'red',
+          backgroundColor: 'blue',
+          msTransition: 'unset',
+          MozTransition: 'initial'
+        }
       },
       'react: should parse vendor prefixed in style declarations'
     )
@@ -569,10 +629,11 @@ test('hast-to-hyperscript', function (t) {
       function () {
         toH(
           r,
-          u('element', {
-            tagName: 'div',
-            properties: {style: 'color:red; /*'}
-          })
+          u(
+            'element',
+            {tagName: 'div', properties: {style: 'color:red; /*'}},
+            []
+          )
         )
       },
       /^Error: div\[style]:1:12: End of comment missing$/,
@@ -582,16 +643,20 @@ test('hast-to-hyperscript', function (t) {
     t.deepEqual(
       toH(
         r,
-        u('element', {
-          tagName: 'div',
-          properties: {
-            foo: 'bar',
-            camelCase: 'on off',
-            'data-123': '456',
-            'data-some': 'yes',
-            'aria-valuenow': '1'
-          }
-        })
+        u(
+          'element',
+          {
+            tagName: 'div',
+            properties: {
+              foo: 'bar',
+              camelCase: 'on off',
+              'data-123': '456',
+              'data-some': 'yes',
+              'aria-valuenow': '1'
+            }
+          },
+          []
+        )
       ).props,
       {
         foo: 'bar',
@@ -608,19 +673,19 @@ test('hast-to-hyperscript', function (t) {
 
   t.test('should support space', function (t) {
     t.equal(
-      toH(v, u('element', {tagName: 'div'})).namespace,
+      toH(v, u('element', {tagName: 'div'}, [])).namespace,
       null,
       'should start in HTML'
     )
 
     t.equal(
-      toH(v, u('element', {tagName: 'div'}), {space: 'svg'}).namespace,
+      toH(v, u('element', {tagName: 'div'}, []), {space: 'svg'}).namespace,
       ns.svg,
       'should support `space: "svg"`'
     )
 
     t.equal(
-      toH(v, u('element', {tagName: 'svg'})).namespace,
+      toH(v, u('element', {tagName: 'svg'}, [])).namespace,
       ns.svg,
       'should infer `space: "svg"`'
     )
@@ -636,6 +701,7 @@ test('hast-to-hyperscript', function (t) {
     var expected = h('h1#a')
     var doc = '<h1 id="a"></h1>'
 
+    // @ts-ignore seems to exist fine 🤷‍♂️
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -646,6 +712,7 @@ test('hast-to-hyperscript', function (t) {
     var expected = h('div')
     var doc = '<div></div>'
 
+    // @ts-ignore Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -656,6 +723,7 @@ test('hast-to-hyperscript', function (t) {
     var expected = h('div', 'Alpha')
     var doc = '<div>Alpha</div>'
 
+    // @ts-ignore Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -672,6 +740,7 @@ test('hast-to-hyperscript', function (t) {
     var expected = h('div', [h('h1', 'Alpha'), h('p', 'Bravo')])
     var doc = '<div><h1>Alpha</h1><p>Bravo</p></div>'
 
+    // @ts-ignore Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -686,12 +755,7 @@ test('hast-to-hyperscript', function (t) {
           tagName: 'svg',
           properties: {xmlnsXLink: 'http://www.w3.org/1999/xlink'}
         },
-        [
-          u('element', {
-            tagName: 'line',
-            properties: {strokeDashArray: 4}
-          })
-        ]
+        [u('element', {tagName: 'line', properties: {strokeDashArray: 4}}, [])]
       )
     )
     var expected = r(
@@ -713,10 +777,11 @@ test('hast-to-hyperscript', function (t) {
   })
 
   t.test('should use a node as a rendering context', function (t) {
+    /**
+     * @this {HastElement}
+     */
     function mockR() {
-      return {
-        node: this
-      }
+      return {node: this}
     }
 
     var node = u(
@@ -725,12 +790,7 @@ test('hast-to-hyperscript', function (t) {
         tagName: 'svg',
         properties: {xmlnsXLink: 'http://www.w3.org/1999/xlink'}
       },
-      [
-        u('element', {
-          tagName: 'line',
-          properties: {strokeDashArray: 4}
-        })
-      ]
+      [u('element', {tagName: 'line', properties: {strokeDashArray: 4}}, [])]
     )
     var actual = toH(mockR, node)
 
@@ -741,20 +801,29 @@ test('hast-to-hyperscript', function (t) {
   t.end()
 })
 
+/**
+ * @param {string} doc
+ * @returns {HastRoot}
+ */
 function html(doc) {
+  // @ts-ignore it’s a root!
   return processor.parse(doc)
 }
 
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
 function json(value) {
   return JSON.parse(JSON.stringify(value))
 }
 
+/**
+ * @param {(v: VueCreateElement) => VueNode} render
+ * @returns {Promise.<string>}
+ */
 function vueToString(render) {
-  return VueSSR.createRenderer({template: identity}).renderToString(
+  return VueSSR.createRenderer({template: ''}).renderToString(
     new Vue({render}).$mount()
   )
-}
-
-function identity(value) {
-  return value
 }

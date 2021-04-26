@@ -1,3 +1,32 @@
+/**
+ * @typedef {import('hast').Element} Element
+ * @typedef {import('hast').Root} Root
+ * @typedef {import('hast').Text} Text
+ *
+ * @typedef {import('unist-util-is').AssertPredicate<Element>} AssertElement
+ * @typedef {import('unist-util-is').AssertPredicate<Text>} AssertText
+ * @typedef {import('unist-util-is').AssertPredicate<Root>} AssertRoot
+ *
+ * @callback CreateElementLike
+ * @param {string} name
+ * @param {Object<string, any>} [attributes]
+ * @param {Array.<string|any>} [children]
+ * @returns {any}
+ *
+ * @typedef Context
+ * @property {html|svg} schema
+ * @property {string|null} prefix
+ * @property {number} key
+ * @property {boolean} react
+ * @property {boolean} vue
+ * @property {boolean} vdom
+ * @property {boolean} hyperscript
+ *
+ * @typedef Options
+ * @property {string|null} [prefix]
+ * @property {'html'|'svg'} [space]
+ */
+
 import {html, svg, find, hastToReact} from 'property-information'
 import {stringify as spaces} from 'space-separated-tokens'
 import {stringify as commas} from 'comma-separated-tokens'
@@ -7,52 +36,76 @@ import {convert} from 'unist-util-is'
 
 var own = {}.hasOwnProperty
 
+/** @type {AssertRoot} */
+// @ts-ignore it’s correct.
 var root = convert('root')
+/** @type {AssertElement} */
+// @ts-ignore it’s correct.
 var element = convert('element')
+/** @type {AssertText} */
+// @ts-ignore it’s correct.
 var text = convert('text')
 
-export function toH(h, node, options) {
-  var settings = options || {}
-  var r = react(h)
-  var v = vue(h)
-  var vd = vdom(h)
-  var prefix
-
+/**
+ * @template {CreateElementLike} H
+ * @param {H} h
+ * @param {Element|Root} tree
+ * @param {string|boolean|Options} [options]
+ * @returns {ReturnType<H>}
+ */
+export function toH(h, tree, options) {
   if (typeof h !== 'function') {
     throw new TypeError('h is not a function')
   }
 
-  if (typeof settings === 'string' || typeof settings === 'boolean') {
-    prefix = settings
-    settings = {}
+  var r = react(h)
+  var v = vue(h)
+  var vd = vdom(h)
+  /** @type {string|boolean} */
+  var prefix
+  /** @type {Element} */
+  var node
+
+  if (typeof options === 'string' || typeof options === 'boolean') {
+    prefix = options
+    options = {}
   } else {
-    prefix = settings.prefix
+    if (!options) options = {}
+    prefix = options.prefix
   }
 
-  if (root(node)) {
+  if (root(tree)) {
+    // @ts-ignore Allow `doctypes` in there, we’ll filter them out later.
     node =
-      node.children.length === 1 && element(node.children[0])
-        ? node.children[0]
+      tree.children.length === 1 && element(tree.children[0])
+        ? tree.children[0]
         : {
             type: 'element',
             tagName: 'div',
             properties: {},
-            children: node.children
+            children: tree.children
           }
-  } else if (!element(node)) {
+  } else if (element(tree)) {
+    node = tree
+  } else {
     throw new Error(
-      'Expected root or element, not `' + ((node && node.type) || node) + '`'
+      // @ts-ignore runtime.
+      'Expected root or element, not `' + ((tree && tree.type) || tree) + '`'
     )
   }
 
   return transform(h, node, {
-    schema: settings.space === 'svg' ? svg : html,
+    schema: options.space === 'svg' ? svg : html,
     prefix:
       prefix === undefined || prefix === null
         ? r || v || vd
           ? 'h-'
           : null
-        : prefix,
+        : typeof prefix === 'string'
+        ? prefix
+        : prefix
+        ? 'h-'
+        : null,
     key: 0,
     react: r,
     vue: v,
@@ -61,15 +114,26 @@ export function toH(h, node, options) {
   })
 }
 
-// Transform a hast node through a hyperscript interface to *anything*!
+/**
+ * Transform a hast node through a hyperscript interface to *anything*!
+ *
+ * @template {CreateElementLike} H
+ * @param {H} h
+ * @param {Element} node
+ * @param {Context} ctx
+ */
 function transform(h, node, ctx) {
   var parentSchema = ctx.schema
   var schema = parentSchema
   var name = node.tagName
+  /** @type {Object.<string, unknown>} */
   var attributes = {}
+  /** @type {Array.<ReturnType<H>|string>} */
   var nodes = []
   var index = -1
+  /** @type {string} */
   var key
+  /** @type {Element['children'][number]} */
   var value
 
   if (parentSchema.space === 'html' && name.toLowerCase() === 'svg') {
@@ -118,9 +182,17 @@ function transform(h, node, ctx) {
     : h.call(node, name, attributes)
 }
 
+/**
+ * @param {Object.<string, unknown>} props
+ * @param {string} prop
+ * @param {unknown} value
+ * @param {Context} ctx
+ * @param {string} name
+ */
 // eslint-disable-next-line complexity, max-params
 function addAttribute(props, prop, value, ctx, name) {
   var info = find(ctx.schema, prop)
+  /** @type {string} */
   var subprop
 
   // Ignore nullish and `NaN` values.
@@ -135,7 +207,7 @@ function addAttribute(props, prop, value, ctx, name) {
     return
   }
 
-  if (value && typeof value === 'object' && 'length' in value) {
+  if (Array.isArray(value)) {
     // Accept `array`.
     // Most props are space-separated.
     value = info.commaSeparated ? commas(value) : spaces(value)
@@ -175,32 +247,67 @@ function addAttribute(props, prop, value, ctx, name) {
   }
 }
 
-// Check if `h` is `react.createElement`.
+/**
+ * Check if `h` is `react.createElement`.
+ *
+ * @param {CreateElementLike} h
+ * @returns {boolean}
+ */
 function react(h) {
-  var node = h && h('div')
+  /** @type {unknown} */
+  var node = h('div')
   return Boolean(
     node &&
+      // @ts-ignore Looks like a React node.
       ('_owner' in node || '_store' in node) &&
+      // @ts-ignore Looks like a React node.
       (node.key === undefined || node.key === null)
   )
 }
 
-// Check if `h` is `hyperscript`.
+/**
+ * Check if `h` is `hyperscript`.
+ *
+ * @param {CreateElementLike} h
+ * @returns {boolean}
+ */
 function hyperscript(h) {
-  return Boolean(h && h.context && h.cleanup)
+  return 'context' in h && 'cleanup' in h
 }
 
-// Check if `h` is `virtual-dom/h`.
+/**
+ * Check if `h` is `virtual-dom/h`.
+ *
+ * @param {CreateElementLike} h
+ * @returns {boolean}
+ */
 function vdom(h) {
-  return h && h('div').type === 'VirtualNode'
+  /** @type {unknown} */
+  var node = h('div')
+  // @ts-ignore Looks like a vnode.
+  return node.type === 'VirtualNode'
 }
 
+/**
+ * Check if `h` is Vue.
+ *
+ * @param {CreateElementLike} h
+ * @returns {boolean}
+ */
 function vue(h) {
-  var node = h && h('div')
+  /** @type {unknown} */
+  var node = h('div')
+  // @ts-ignore Looks like a Vue node.
   return Boolean(node && node.context && node.context._isVue)
 }
 
+/**
+ * @param {string} value
+ * @param {string} tagName
+ * @returns {Object.<string, string>}
+ */
 function parseStyle(value, tagName) {
+  /** @type {Object.<string, string>} */
   var result = {}
 
   try {
@@ -213,12 +320,22 @@ function parseStyle(value, tagName) {
 
   return result
 
+  /**
+   * @param {string} name
+   * @param {string} value
+   * @returns {void}
+   */
   function iterator(name, value) {
     if (name.slice(0, 4) === '-ms-') name = 'ms-' + name.slice(4)
     result[name.replace(/-([a-z])/g, styleReplacer)] = value
   }
 }
 
-function styleReplacer($0, $1) {
+/**
+ * @param {string} _
+ * @param {string} $1
+ * @returns {string}
+ */
+function styleReplacer(_, $1) {
   return $1.toUpperCase()
 }
