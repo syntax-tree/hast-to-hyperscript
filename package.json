@@ -72,7 +72,7 @@
     "virtual-dom": "^2.0.0",
     "vue": "^2.0.0",
     "vue-server-renderer": "^2.0.0",
-    "xo": "^0.39.0"
+    "xo": "^0.42.0"
   },
   "scripts": {
     "prepack": "npm run build && npm run format",
