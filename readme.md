@@ -28,7 +28,7 @@ npm install hast-to-hyperscript
 import {toH} from 'hast-to-hyperscript'
 import h from 'hyperscript'
 
-var tree = {
+const tree = {
   type: 'element',
   tagName: 'p',
   properties: {id: 'alpha', className: ['bravo']},
@@ -45,7 +45,7 @@ var tree = {
 }
 
 // Transform (`hyperscript` needs `outerHTML` to serialize):
-var doc = toH(h, tree).outerHTML
+const doc = toH(h, tree).outerHTML
 
 console.log(doc)
 ```

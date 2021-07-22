@@ -9,7 +9,7 @@
  *
  * @callback CreateElementLike
  * @param {string} name
- * @param {Object<string, any>} [attributes]
+ * @param {Record<string, any>} [attributes]
  * @param {Array.<string|any>} [children]
  * @returns {any}
  *
@@ -34,17 +34,17 @@ import style from 'style-to-object'
 import {webNamespaces as ns} from 'web-namespaces'
 import {convert} from 'unist-util-is'
 
-var own = {}.hasOwnProperty
+const own = {}.hasOwnProperty
 
 /** @type {AssertRoot} */
 // @ts-ignore it’s correct.
-var root = convert('root')
+const root = convert('root')
 /** @type {AssertElement} */
 // @ts-ignore it’s correct.
-var element = convert('element')
+const element = convert('element')
 /** @type {AssertText} */
 // @ts-ignore it’s correct.
-var text = convert('text')
+const text = convert('text')
 
 /**
  * @template {CreateElementLike} H
@@ -58,13 +58,13 @@ export function toH(h, tree, options) {
     throw new TypeError('h is not a function')
   }
 
-  var r = react(h)
-  var v = vue(h)
-  var vd = vdom(h)
+  const r = react(h)
+  const v = vue(h)
+  const vd = vdom(h)
   /** @type {string|boolean} */
-  var prefix
+  let prefix
   /** @type {Element} */
-  var node
+  let node
 
   if (typeof options === 'string' || typeof options === 'boolean') {
     prefix = options
@@ -123,18 +123,16 @@ export function toH(h, tree, options) {
  * @param {Context} ctx
  */
 function transform(h, node, ctx) {
-  var parentSchema = ctx.schema
-  var schema = parentSchema
-  var name = node.tagName
-  /** @type {Object.<string, unknown>} */
-  var attributes = {}
+  const parentSchema = ctx.schema
+  let schema = parentSchema
+  let name = node.tagName
+  /** @type {Record<string, unknown>} */
+  const attributes = {}
   /** @type {Array.<ReturnType<H>|string>} */
-  var nodes = []
-  var index = -1
+  const nodes = []
+  let index = -1
   /** @type {string} */
-  var key
-  /** @type {Element['children'][number]} */
-  var value
+  let key
 
   if (parentSchema.space === 'html' && name.toLowerCase() === 'svg') {
     schema = svg
@@ -162,7 +160,7 @@ function transform(h, node, ctx) {
 
   if (node.children) {
     while (++index < node.children.length) {
-      value = node.children[index]
+      const value = node.children[index]
 
       if (element(value)) {
         nodes.push(transform(h, value, ctx))
@@ -183,7 +181,7 @@ function transform(h, node, ctx) {
 }
 
 /**
- * @param {Object.<string, unknown>} props
+ * @param {Record<string, unknown>} props
  * @param {string} prop
  * @param {unknown} value
  * @param {Context} ctx
@@ -191,9 +189,9 @@ function transform(h, node, ctx) {
  */
 // eslint-disable-next-line complexity, max-params
 function addAttribute(props, prop, value, ctx, name) {
-  var info = find(ctx.schema, prop)
+  const info = find(ctx.schema, prop)
   /** @type {string} */
-  var subprop
+  let subprop
 
   // Ignore nullish and `NaN` values.
   // Ignore `false` and falsey known booleans for hyperlike DSLs.
@@ -255,7 +253,7 @@ function addAttribute(props, prop, value, ctx, name) {
  */
 function react(h) {
   /** @type {unknown} */
-  var node = h('div')
+  const node = h('div')
   return Boolean(
     node &&
       // @ts-ignore Looks like a React node.
@@ -283,7 +281,7 @@ function hyperscript(h) {
  */
 function vdom(h) {
   /** @type {unknown} */
-  var node = h('div')
+  const node = h('div')
   // @ts-ignore Looks like a vnode.
   return node.type === 'VirtualNode'
 }
@@ -296,7 +294,7 @@ function vdom(h) {
  */
 function vue(h) {
   /** @type {unknown} */
-  var node = h('div')
+  const node = h('div')
   // @ts-ignore Looks like a Vue node.
   return Boolean(node && node.context && node.context._isVue)
 }
@@ -304,14 +302,27 @@ function vue(h) {
 /**
  * @param {string} value
  * @param {string} tagName
- * @returns {Object.<string, string>}
+ * @returns {Record<string, string>}
  */
 function parseStyle(value, tagName) {
-  /** @type {Object.<string, string>} */
-  var result = {}
+  /** @type {Record<string, string>} */
+  const result = {}
 
   try {
-    style(value, iterator)
+    style(value, (name, value) => {
+      if (name.slice(0, 4) === '-ms-') name = 'ms-' + name.slice(4)
+
+      result[
+        name.replace(
+          /-([a-z])/g,
+          /**
+           * @param {string} _
+           * @param {string} $1
+           * @returns {string}
+           */ (_, $1) => $1.toUpperCase()
+        )
+      ] = value
+    })
   } catch (error) {
     error.message =
       tagName + '[style]' + error.message.slice('undefined'.length)
@@ -319,23 +330,4 @@ function parseStyle(value, tagName) {
   }
 
   return result
-
-  /**
-   * @param {string} name
-   * @param {string} value
-   * @returns {void}
-   */
-  function iterator(name, value) {
-    if (name.slice(0, 4) === '-ms-') name = 'ms-' + name.slice(4)
-    result[name.replace(/-([a-z])/g, styleReplacer)] = value
-  }
-}
-
-/**
- * @param {string} _
- * @param {string} $1
- * @returns {string}
- */
-function styleReplacer(_, $1) {
-  return $1.toUpperCase()
 }

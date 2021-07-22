@@ -19,34 +19,31 @@ import Vue from 'vue'
 import VueSSR from 'vue-server-renderer'
 import {toH} from './index.js'
 
-var processor = rehype().data('settings', {fragment: true, position: false})
+const processor = rehype().data('settings', {fragment: true, position: false})
 
-test('hast-to-hyperscript', function (t) {
-  /** @type {HastRoot|HastElement} */
-  var hast
-
+test('hast-to-hyperscript', (t) => {
   t.equal(typeof toH, 'function', 'should expose a function')
 
-  t.test('should throw if not given h', function (t) {
-    t.throws(function () {
+  t.test('should throw if not given h', (t) => {
+    t.throws(() => {
       toH(null, u('element', {tagName: ''}, []))
     }, /h is not a function/)
 
     t.end()
   })
 
-  t.test('should throw if not given a node', function (t) {
-    t.throws(function () {
+  t.test('should throw if not given a node', (t) => {
+    t.throws(() => {
       // @ts-ignore runtime.
       toH(h)
     }, /Expected root or element, not `undefined`/)
 
-    t.throws(function () {
+    t.throws(() => {
       // @ts-ignore runtime.
       toH(h, u('text', 'Alpha'))
     }, /Error: Expected root or element, not `text`/)
 
-    t.throws(function () {
+    t.throws(() => {
       // @ts-ignore runtime.
       toH(h, u('text', 'value'))
     }, /Expected root or element/)
@@ -54,7 +51,7 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  hast = u('root', [
+  const hast = u('root', [
     u(
       'element',
       {
@@ -123,7 +120,7 @@ test('hast-to-hyperscript', function (t) {
     )
   ])
 
-  var doc = [
+  const doc = [
     '<div>',
     '<h1',
     ' id="a"',
@@ -156,11 +153,11 @@ test('hast-to-hyperscript', function (t) {
     '</div>'
   ].join('')
 
-  t.test('should support `hyperscript`', function (t) {
+  t.test('should support `hyperscript`', (t) => {
     // `hyperscript` does not support SVG (camelcased props).
-    var baseline = doc.replace(/viewBox/, 'viewbox')
-    var actual = toH(h, hast)
-    var expected = h('div', [
+    const baseline = doc.replace(/viewBox/, 'viewbox')
+    const actual = toH(h, hast)
+    const expected = h('div', [
       h('h1#a.b.c', {hidden: '', attrs: {height: '2'}}, [
         'bravo ',
         h(
@@ -195,10 +192,10 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should support `virtual-dom/h`', function (t) {
-    var baseline = doc.replace(/color:red;/, 'color: red;')
-    var actual = toH(v, hast)
-    var expected = v('div', {key: 'h-1'}, [
+  t.test('should support `virtual-dom/h`', (t) => {
+    const baseline = doc.replace(/color:red;/, 'color: red;')
+    const actual = toH(v, hast)
+    const expected = v('div', {key: 'h-1'}, [
       v(
         'h1',
         {
@@ -268,13 +265,13 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should support `React.createElement` in `development`', function (t) {
-    var currentEnv = process.env.NODE_ENV
-    var baseline = doc.replace(/color:red;/, 'color:red')
+  t.test('should support `React.createElement` in `development`', (t) => {
+    const currentEnv = process.env.NODE_ENV
+    const baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'development'
 
-    var actual = toH(r, hast)
-    var expected = r(
+    const actual = toH(r, hast)
+    const expected = r(
       'div',
       {key: 'h-1'},
       r(
@@ -336,13 +333,13 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should support `React.createElement` in `production`', function (t) {
-    var currentEnv = process.env.NODE_ENV
-    var baseline = doc.replace(/color:red;/, 'color:red')
+  t.test('should support `React.createElement` in `production`', (t) => {
+    const currentEnv = process.env.NODE_ENV
+    const baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'production'
 
-    var actual = toH(r, hast)
-    var expected = r(
+    const actual = toH(r, hast)
+    const expected = r(
       'div',
       {key: 'h-1'},
       r(
@@ -403,19 +400,19 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should support `Vue`', function (t) {
-    var baseline = doc.replace(/<div>/, '<div data-server-rendered="true">')
+  t.test('should support `Vue`', (t) => {
+    const baseline = doc.replace(/<div>/, '<div data-server-rendered="true">')
     /** @type {VueNode} */
-    var actual
+    let actual
     /** @type {VueNode} */
-    var expected
+    let expected
 
     t.plan(3)
 
     Promise.all([vueToString(actualRender), vueToString(expectedRender)])
-      .then(function (all) {
-        var actualString = all[0]
-        var expectedString = all[0]
+      .then((all) => {
+        const actualString = all[0]
+        const expectedString = all[0]
 
         t.deepEqual(clean(actual), clean(expected), 'equal syntax trees')
         t.deepEqual(html(actualString), html(baseline), 'equal output')
@@ -427,7 +424,7 @@ test('hast-to-hyperscript', function (t) {
         )
       })
       .catch(
-        /** @param {Error} error */ function (error) {
+        /** @param {Error} error */ (error) => {
           t.ifErr(error, 'did not expect an error')
         }
       )
@@ -512,7 +509,7 @@ test('hast-to-hyperscript', function (t) {
      * @param {VueNode} node
      */
     function remove(node) {
-      var index = -1
+      let index = -1
       delete node.context
       if (node.children) {
         while (++index < node.children.length) {
@@ -522,7 +519,7 @@ test('hast-to-hyperscript', function (t) {
     }
   })
 
-  t.test('should support keys', function (t) {
+  t.test('should support keys', (t) => {
     t.equal(
       // @ts-ignore Types are wrong.
       toH(h, u('element', {tagName: 'div'}, [])).key,
@@ -568,7 +565,7 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should support style and other funky props', function (t) {
+  t.test('should support style and other funky props', (t) => {
     t.deepEqual(
       vToString(
         toH(
@@ -626,7 +623,7 @@ test('hast-to-hyperscript', function (t) {
     )
 
     t.throws(
-      function () {
+      () => {
         toH(
           r,
           u(
@@ -671,7 +668,7 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should support space', function (t) {
+  t.test('should support space', (t) => {
     t.equal(
       toH(v, u('element', {tagName: 'div'}, [])).namespace,
       null,
@@ -693,13 +690,13 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('flattens a `root` with one element to that child', function (t) {
-    var actual = toH(
+  t.test('flattens a `root` with one element to that child', (t) => {
+    const actual = toH(
       h,
       u('root', [u('element', {tagName: 'h1', properties: {id: 'a'}}, [])])
     )
-    var expected = h('h1#a')
-    var doc = '<h1 id="a"></h1>'
+    const expected = h('h1#a')
+    const doc = '<h1 id="a"></h1>'
 
     // @ts-ignore seems to exist fine 🤷‍♂️
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
@@ -707,10 +704,10 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('flattens a `root` without children to a `div`', function (t) {
-    var actual = toH(h, u('root', []))
-    var expected = h('div')
-    var doc = '<div></div>'
+  t.test('flattens a `root` without children to a `div`', (t) => {
+    const actual = toH(h, u('root', []))
+    const expected = h('div')
+    const doc = '<div></div>'
 
     // @ts-ignore Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
@@ -718,10 +715,10 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('flattens a `root` with a text child to a `div`', function (t) {
-    var actual = toH(h, u('root', [u('text', 'Alpha')]))
-    var expected = h('div', 'Alpha')
-    var doc = '<div>Alpha</div>'
+  t.test('flattens a `root` with a text child to a `div`', (t) => {
+    const actual = toH(h, u('root', [u('text', 'Alpha')]))
+    const expected = h('div', 'Alpha')
+    const doc = '<div>Alpha</div>'
 
     // @ts-ignore Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
@@ -729,16 +726,16 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('flattens a `root` with more children to a `div`', function (t) {
-    var actual = toH(
+  t.test('flattens a `root` with more children to a `div`', (t) => {
+    const actual = toH(
       h,
       u('root', [
         u('element', {tagName: 'h1'}, [u('text', 'Alpha')]),
         u('element', {tagName: 'p'}, [u('text', 'Bravo')])
       ])
     )
-    var expected = h('div', [h('h1', 'Alpha'), h('p', 'Bravo')])
-    var doc = '<div><h1>Alpha</h1><p>Bravo</p></div>'
+    const expected = h('div', [h('h1', 'Alpha'), h('p', 'Bravo')])
+    const doc = '<div><h1>Alpha</h1><p>Bravo</p></div>'
 
     // @ts-ignore Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
@@ -746,8 +743,8 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should support mapping to React properties', function (t) {
-    var actual = toH(
+  t.test('should support mapping to React properties', (t) => {
+    const actual = toH(
       r,
       u(
         'element',
@@ -758,7 +755,7 @@ test('hast-to-hyperscript', function (t) {
         [u('element', {tagName: 'line', properties: {strokeDashArray: 4}}, [])]
       )
     )
-    var expected = r(
+    const expected = r(
       'svg',
       {
         key: 'h-1',
@@ -776,7 +773,7 @@ test('hast-to-hyperscript', function (t) {
     t.end()
   })
 
-  t.test('should use a node as a rendering context', function (t) {
+  t.test('should use a node as a rendering context', (t) => {
     /**
      * @this {HastElement}
      */
@@ -784,7 +781,7 @@ test('hast-to-hyperscript', function (t) {
       return {node: this}
     }
 
-    var node = u(
+    const node = u(
       'element',
       {
         tagName: 'svg',
@@ -792,7 +789,7 @@ test('hast-to-hyperscript', function (t) {
       },
       [u('element', {tagName: 'line', properties: {strokeDashArray: 4}}, [])]
     )
-    var actual = toH(mockR, node)
+    const actual = toH(mockR, node)
 
     t.equal(actual.node, node, 'equal rendering context')
     t.end()
