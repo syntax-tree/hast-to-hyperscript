@@ -10,8 +10,10 @@ import {webNamespaces as ns} from 'web-namespaces'
 import {u} from 'unist-builder'
 import h from 'hyperscript'
 import {h as v} from 'virtual-dom'
+// @ts-expect-error: hush
 import vs from 'virtual-dom/virtual-hyperscript/svg.js'
 import rehype from 'rehype'
+// @ts-expect-error: hush
 import vToString from 'vdom-to-html'
 import {createElement as r} from 'react'
 import {renderToStaticMarkup as rToString} from 'react-dom/server.js'
@@ -26,6 +28,7 @@ test('hast-to-hyperscript', (t) => {
 
   t.test('should throw if not given h', (t) => {
     t.throws(() => {
+      // @ts-expect-error: runtime
       toH(null, u('element', {tagName: ''}, []))
     }, /h is not a function/)
 
@@ -34,17 +37,17 @@ test('hast-to-hyperscript', (t) => {
 
   t.test('should throw if not given a node', (t) => {
     t.throws(() => {
-      // @ts-ignore runtime.
+      // @ts-expect-error runtime.
       toH(h)
     }, /Expected root or element, not `undefined`/)
 
     t.throws(() => {
-      // @ts-ignore runtime.
+      // @ts-expect-error runtime.
       toH(h, u('text', 'Alpha'))
     }, /Error: Expected root or element, not `text`/)
 
     t.throws(() => {
-      // @ts-ignore runtime.
+      // @ts-expect-error runtime.
       toH(h, u('text', 'value'))
     }, /Expected root or element/)
 
@@ -180,7 +183,7 @@ test('hast-to-hyperscript', (t) => {
       )
     ])
 
-    // @ts-ignore `outerHTML` definitely does exist.
+    // @ts-expect-error `outerHTML` definitely does exist.
     t.deepEqual(html(actual.outerHTML), html(baseline), 'equal output')
 
     t.deepEqual(
@@ -194,13 +197,15 @@ test('hast-to-hyperscript', (t) => {
 
   t.test('should support `virtual-dom/h`', (t) => {
     const baseline = doc.replace(/color:red;/, 'color: red;')
+    /** @type {ReturnType<v>} */
+    // @ts-expect-error Vue is too strict.
     const actual = toH(v, hast)
     const expected = v('div', {key: 'h-1'}, [
       v(
         'h1',
         {
           key: 'h-2',
-          // @ts-ignore Works fine.
+          // @ts-expect-error Works fine.
           attributes: {id: 'a', class: 'b c', hidden: true, height: 2}
         },
         [
@@ -521,42 +526,42 @@ test('hast-to-hyperscript', (t) => {
 
   t.test('should support keys', (t) => {
     t.equal(
-      // @ts-ignore Types are wrong.
+      // @ts-expect-error Types are wrong.
       toH(h, u('element', {tagName: 'div'}, [])).key,
       undefined,
       'should not patch `keys` normally'
     )
 
     t.equal(
-      // @ts-ignore Types are wrong.
+      // @ts-expect-error Types are wrong.
       toH(h, u('element', {tagName: 'div'}, []), 'prefix-').key,
       'prefix-1',
       'should patch `keys` when given'
     )
 
     t.equal(
-      // @ts-ignore Types are wrong.
+      // @ts-expect-error Types are wrong.
       toH(h, u('element', {tagName: 'div'}, []), true).key,
       'h-1',
       'should patch `keys` when `true`'
     )
 
     t.equal(
-      // @ts-ignore Types are wrong.
+      // @ts-expect-error Types are wrong.
       toH(h, u('element', {tagName: 'div'}, []), false).key,
       undefined,
       'should not patch `keys` when `false`'
     )
 
     t.equal(
-      // @ts-ignore Types are wrong.
+      // @ts-expect-error Types are wrong.
+      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'div'}, [])).key,
       'h-1',
       'should patch `keys` on vdom'
     )
 
     t.equal(
-      // @ts-ignore Types are wrong.
       toH(r, u('element', {tagName: 'div'}, [])).key,
       'h-1',
       'should patch `keys` on react'
@@ -569,6 +574,7 @@ test('hast-to-hyperscript', (t) => {
     t.deepEqual(
       vToString(
         toH(
+          // @ts-expect-error Vue is too strict.
           v,
           u('element', {tagName: 'div', properties: {style: 'color:red'}}, [])
         )
@@ -581,7 +587,7 @@ test('hast-to-hyperscript', (t) => {
       toH(
         h,
         u('element', {tagName: 'div', properties: {style: 'color: red'}}, [])
-        // @ts-ignore Types are wrong.
+        // @ts-expect-error Types are wrong.
       ).outerHTML,
       '<div style="color:red;"></div>',
       'hyperscript: should parse a style declaration'
@@ -670,18 +676,24 @@ test('hast-to-hyperscript', (t) => {
 
   t.test('should support space', (t) => {
     t.equal(
+      // @ts-expect-error Vue is too strict.
+      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'div'}, [])).namespace,
       null,
       'should start in HTML'
     )
 
     t.equal(
+      // @ts-expect-error Vue is too strict.
+      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'div'}, []), {space: 'svg'}).namespace,
       ns.svg,
       'should support `space: "svg"`'
     )
 
     t.equal(
+      // @ts-expect-error Vue is too strict.
+      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'svg'}, [])).namespace,
       ns.svg,
       'should infer `space: "svg"`'
@@ -698,7 +710,7 @@ test('hast-to-hyperscript', (t) => {
     const expected = h('h1#a')
     const doc = '<h1 id="a"></h1>'
 
-    // @ts-ignore seems to exist fine 🤷‍♂️
+    // @ts-expect-error seems to exist fine 🤷‍♂️
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -709,7 +721,7 @@ test('hast-to-hyperscript', (t) => {
     const expected = h('div')
     const doc = '<div></div>'
 
-    // @ts-ignore Types are wrong.
+    // @ts-expect-error Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -720,7 +732,7 @@ test('hast-to-hyperscript', (t) => {
     const expected = h('div', 'Alpha')
     const doc = '<div>Alpha</div>'
 
-    // @ts-ignore Types are wrong.
+    // @ts-expect-error Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -737,7 +749,7 @@ test('hast-to-hyperscript', (t) => {
     const expected = h('div', [h('h1', 'Alpha'), h('p', 'Bravo')])
     const doc = '<div><h1>Alpha</h1><p>Bravo</p></div>'
 
-    // @ts-ignore Types are wrong.
+    // @ts-expect-error Types are wrong.
     t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
     t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
     t.end()
@@ -803,7 +815,7 @@ test('hast-to-hyperscript', (t) => {
  * @returns {HastRoot}
  */
 function html(doc) {
-  // @ts-ignore it’s a root!
+  // @ts-expect-error it’s a root!
   return processor.parse(doc)
 }
 

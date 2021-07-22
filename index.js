@@ -31,19 +31,22 @@ import {html, svg, find, hastToReact} from 'property-information'
 import {stringify as spaces} from 'space-separated-tokens'
 import {stringify as commas} from 'comma-separated-tokens'
 import style from 'style-to-object'
-import {webNamespaces as ns} from 'web-namespaces'
+import {webNamespaces} from 'web-namespaces'
 import {convert} from 'unist-util-is'
+
+const ns = /** @type {Record<string, string>} */ (webNamespaces)
+const toReact = /** @type {Record<string, string>} */ (hastToReact)
 
 const own = {}.hasOwnProperty
 
 /** @type {AssertRoot} */
-// @ts-ignore it’s correct.
+// @ts-expect-error it’s correct.
 const root = convert('root')
 /** @type {AssertElement} */
-// @ts-ignore it’s correct.
+// @ts-expect-error it’s correct.
 const element = convert('element')
 /** @type {AssertText} */
-// @ts-ignore it’s correct.
+// @ts-expect-error it’s correct.
 const text = convert('text')
 
 /**
@@ -61,7 +64,7 @@ export function toH(h, tree, options) {
   const r = react(h)
   const v = vue(h)
   const vd = vdom(h)
-  /** @type {string|boolean} */
+  /** @type {string|boolean|null|undefined} */
   let prefix
   /** @type {Element} */
   let node
@@ -75,7 +78,7 @@ export function toH(h, tree, options) {
   }
 
   if (root(tree)) {
-    // @ts-ignore Allow `doctypes` in there, we’ll filter them out later.
+    // @ts-expect-error Allow `doctypes` in there, we’ll filter them out later.
     node =
       tree.children.length === 1 && element(tree.children[0])
         ? tree.children[0]
@@ -89,7 +92,7 @@ export function toH(h, tree, options) {
     node = tree
   } else {
     throw new Error(
-      // @ts-ignore runtime.
+      // @ts-expect-error runtime.
       'Expected root or element, not `' + ((tree && tree.type) || tree) + '`'
     )
   }
@@ -140,7 +143,7 @@ function transform(h, node, ctx) {
   }
 
   for (key in node.properties) {
-    if (own.call(node.properties, key)) {
+    if (node.properties && own.call(node.properties, key)) {
       addAttribute(attributes, key, node.properties[key], ctx, name)
     }
   }
@@ -148,7 +151,7 @@ function transform(h, node, ctx) {
   if (ctx.vdom) {
     if (schema.space === 'html') {
       name = name.toUpperCase()
-    } else {
+    } else if (schema.space) {
       attributes.namespace = ns[schema.space]
     }
   }
@@ -190,7 +193,7 @@ function transform(h, node, ctx) {
 // eslint-disable-next-line complexity, max-params
 function addAttribute(props, prop, value, ctx, name) {
   const info = find(ctx.schema, prop)
-  /** @type {string} */
+  /** @type {string|undefined} */
   let subprop
 
   // Ignore nullish and `NaN` values.
@@ -236,10 +239,11 @@ function addAttribute(props, prop, value, ctx, name) {
   }
 
   if (subprop) {
-    if (!props[subprop]) props[subprop] = {}
-    props[subprop][info.attribute] = value
+    props[subprop] = Object.assign(props[subprop] || {}, {
+      [info.attribute]: value
+    })
   } else if (info.space && ctx.react) {
-    props[hastToReact[info.property] || info.property] = value
+    props[toReact[info.property] || info.property] = value
   } else {
     props[info.attribute] = value
   }
@@ -256,9 +260,9 @@ function react(h) {
   const node = h('div')
   return Boolean(
     node &&
-      // @ts-ignore Looks like a React node.
+      // @ts-expect-error Looks like a React node.
       ('_owner' in node || '_store' in node) &&
-      // @ts-ignore Looks like a React node.
+      // @ts-expect-error Looks like a React node.
       (node.key === undefined || node.key === null)
   )
 }
@@ -282,7 +286,7 @@ function hyperscript(h) {
 function vdom(h) {
   /** @type {unknown} */
   const node = h('div')
-  // @ts-ignore Looks like a vnode.
+  // @ts-expect-error Looks like a vnode.
   return node.type === 'VirtualNode'
 }
 
@@ -295,7 +299,7 @@ function vdom(h) {
 function vue(h) {
   /** @type {unknown} */
   const node = h('div')
-  // @ts-ignore Looks like a Vue node.
+  // @ts-expect-error Looks like a Vue node.
   return Boolean(node && node.context && node.context._isVue)
 }
 
