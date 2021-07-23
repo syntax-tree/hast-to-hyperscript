@@ -198,7 +198,6 @@ test('hast-to-hyperscript', (t) => {
   t.test('should support `virtual-dom/h`', (t) => {
     const baseline = doc.replace(/color:red;/, 'color: red;')
     /** @type {ReturnType<v>} */
-    // @ts-expect-error Vue is too strict.
     const actual = toH(v, hast)
     const expected = v('div', {key: 'h-1'}, [
       v(
@@ -554,8 +553,6 @@ test('hast-to-hyperscript', (t) => {
     )
 
     t.equal(
-      // @ts-expect-error Types are wrong.
-      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'div'}, [])).key,
       'h-1',
       'should patch `keys` on vdom'
@@ -574,7 +571,6 @@ test('hast-to-hyperscript', (t) => {
     t.deepEqual(
       vToString(
         toH(
-          // @ts-expect-error Vue is too strict.
           v,
           u('element', {tagName: 'div', properties: {style: 'color:red'}}, [])
         )
@@ -676,24 +672,18 @@ test('hast-to-hyperscript', (t) => {
 
   t.test('should support space', (t) => {
     t.equal(
-      // @ts-expect-error Vue is too strict.
-      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'div'}, [])).namespace,
       null,
       'should start in HTML'
     )
 
     t.equal(
-      // @ts-expect-error Vue is too strict.
-      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'div'}, []), {space: 'svg'}).namespace,
       ns.svg,
       'should support `space: "svg"`'
     )
 
     t.equal(
-      // @ts-expect-error Vue is too strict.
-      // type-coverage:ignore-next-line
       toH(v, u('element', {tagName: 'svg'}, [])).namespace,
       ns.svg,
       'should infer `space: "svg"`'

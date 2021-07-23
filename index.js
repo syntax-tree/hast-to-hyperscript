@@ -9,7 +9,7 @@
  *
  * @callback CreateElementLike
  * @param {string} name
- * @param {Record<string, any>} [attributes]
+ * @param {any} attributes
  * @param {Array.<string|any>} [children]
  * @returns {any}
  *
@@ -257,7 +257,7 @@ function addAttribute(props, prop, value, ctx, name) {
  */
 function react(h) {
   /** @type {unknown} */
-  const node = h('div')
+  const node = h('div', {})
   return Boolean(
     node &&
       // @ts-expect-error Looks like a React node.
@@ -285,7 +285,7 @@ function hyperscript(h) {
  */
 function vdom(h) {
   /** @type {unknown} */
-  const node = h('div')
+  const node = h('div', {})
   // @ts-expect-error Looks like a vnode.
   return node.type === 'VirtualNode'
 }
@@ -298,7 +298,7 @@ function vdom(h) {
  */
 function vue(h) {
   /** @type {unknown} */
-  const node = h('div')
+  const node = h('div', {})
   // @ts-expect-error Looks like a Vue node.
   return Boolean(node && node.context && node.context._isVue)
 }
