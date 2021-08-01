@@ -12,7 +12,7 @@ import h from 'hyperscript'
 import {h as v} from 'virtual-dom'
 // @ts-expect-error: hush
 import vs from 'virtual-dom/virtual-hyperscript/svg.js'
-import rehype from 'rehype'
+import {rehype} from 'rehype'
 // @ts-expect-error: hush
 import vToString from 'vdom-to-html'
 import {createElement as r} from 'react'
@@ -805,7 +805,6 @@ test('hast-to-hyperscript', (t) => {
  * @returns {HastRoot}
  */
 function html(doc) {
-  // @ts-expect-error it’s a root!
   return processor.parse(doc)
 }
 
