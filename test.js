@@ -8,6 +8,7 @@
 import test from 'tape'
 import {webNamespaces as ns} from 'web-namespaces'
 import {u} from 'unist-builder'
+import {removePosition} from 'unist-util-remove-position'
 import h from 'hyperscript'
 import {h as v} from 'virtual-dom'
 // @ts-expect-error: hush
@@ -21,7 +22,7 @@ import Vue from 'vue'
 import VueSSR from 'vue-server-renderer'
 import {toH} from './index.js'
 
-const processor = rehype().data('settings', {fragment: true, position: false})
+const processor = rehype().data('settings', {fragment: true})
 
 test('hast-to-hyperscript', (t) => {
   t.equal(typeof toH, 'function', 'should expose a function')
@@ -805,7 +806,7 @@ test('hast-to-hyperscript', (t) => {
  * @returns {HastRoot}
  */
 function html(doc) {
-  return processor.parse(doc)
+  return removePosition(processor.parse(doc), true)
 }
 
 /**
