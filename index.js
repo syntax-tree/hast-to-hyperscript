@@ -304,6 +304,20 @@ function vue(h) {
 }
 
 /**
+ * Checks if an unknown variable is an error
+ *
+ * @param {unknown} maybeError
+ * @returns {maybeError is Error}
+ */
+function isError(maybeError) {
+  return (
+    typeof maybeError === 'object' &&
+    maybeError !== null &&
+    'message' in maybeError
+  )
+}
+
+/**
  * @param {string} value
  * @param {string} tagName
  * @returns {Record<string, string>}
@@ -328,8 +342,11 @@ function parseStyle(value, tagName) {
       ] = value
     })
   } catch (error) {
-    error.message =
-      tagName + '[style]' + error.message.slice('undefined'.length)
+    if (isError(error)) {
+      error.message =
+        tagName + '[style]' + error.message.slice('undefined'.length)
+    }
+
     throw error
   }
 
