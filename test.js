@@ -44,12 +44,10 @@ test('hast-to-hyperscript', (t) => {
     }, /Expected root or element, not `undefined`/)
 
     t.throws(() => {
-      // @ts-expect-error runtime.
       toH(h, u('text', 'Alpha'))
     }, /Error: Expected root or element, not `text`/)
 
     t.throws(() => {
-      // @ts-expect-error runtime.
       toH(h, u('text', 'value'))
     }, /Expected root or element/)
 

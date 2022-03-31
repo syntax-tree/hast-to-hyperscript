@@ -2,15 +2,12 @@
  * @typedef {import('hast').Element} Element
  * @typedef {import('hast').Root} Root
  * @typedef {import('hast').Text} Text
- *
- * @typedef {import('unist-util-is').AssertPredicate<Element>} AssertElement
- * @typedef {import('unist-util-is').AssertPredicate<Text>} AssertText
- * @typedef {import('unist-util-is').AssertPredicate<Root>} AssertRoot
+ * @typedef {import('hast').Root|import('hast').Content} Node
  *
  * @callback CreateElementLike
  * @param {string} name
  * @param {any} attributes
- * @param {Array.<string|any>} [children]
+ * @param {Array<any>} [children]
  * @returns {any}
  *
  * @typedef Context
@@ -32,30 +29,19 @@ import {stringify as spaces} from 'space-separated-tokens'
 import {stringify as commas} from 'comma-separated-tokens'
 import style from 'style-to-object'
 import {webNamespaces} from 'web-namespaces'
-import {convert} from 'unist-util-is'
 
-const ns = /** @type {Record<string, string>} */ (webNamespaces)
 const toReact = /** @type {Record<string, string>} */ (hastToReact)
 
 const own = {}.hasOwnProperty
 
-/** @type {AssertRoot} */
-// @ts-expect-error it’s correct.
-const root = convert('root')
-/** @type {AssertElement} */
-// @ts-expect-error it’s correct.
-const element = convert('element')
-/** @type {AssertText} */
-// @ts-expect-error it’s correct.
-const text = convert('text')
-
 /**
  * @template {CreateElementLike} H
  * @param {H} h
- * @param {Element|Root} tree
+ * @param {Node} tree
  * @param {string|boolean|Options} [options]
  * @returns {ReturnType<H>}
  */
+// eslint-disable-next-line complexity
 export function toH(h, tree, options) {
   if (typeof h !== 'function') {
     throw new TypeError('h is not a function')
@@ -77,22 +63,22 @@ export function toH(h, tree, options) {
     prefix = options.prefix
   }
 
-  if (root(tree)) {
+  if (tree && tree.type === 'root') {
+    const head = tree.children[0]
     // @ts-expect-error Allow `doctypes` in there, we’ll filter them out later.
     node =
-      tree.children.length === 1 && element(tree.children[0])
-        ? tree.children[0]
+      tree.children.length === 1 && head.type === 'element'
+        ? head
         : {
             type: 'element',
             tagName: 'div',
             properties: {},
             children: tree.children
           }
-  } else if (element(tree)) {
+  } else if (tree && tree.type === 'element') {
     node = tree
   } else {
     throw new Error(
-      // @ts-expect-error runtime.
       'Expected root or element, not `' + ((tree && tree.type) || tree) + '`'
     )
   }
@@ -131,7 +117,7 @@ function transform(h, node, ctx) {
   let name = node.tagName
   /** @type {Record<string, unknown>} */
   const attributes = {}
-  /** @type {Array.<ReturnType<H>|string>} */
+  /** @type {Array<ReturnType<H>|string>} */
   const nodes = []
   let index = -1
   /** @type {string} */
@@ -152,7 +138,7 @@ function transform(h, node, ctx) {
     if (schema.space === 'html') {
       name = name.toUpperCase()
     } else if (schema.space) {
-      attributes.namespace = ns[schema.space]
+      attributes.namespace = webNamespaces[schema.space]
     }
   }
 
@@ -165,9 +151,9 @@ function transform(h, node, ctx) {
     while (++index < node.children.length) {
       const value = node.children[index]
 
-      if (element(value)) {
+      if (value.type === 'element') {
         nodes.push(transform(h, value, ctx))
-      } else if (text(value)) {
+      } else if (value.type === 'text') {
         nodes.push(value.value)
       }
     }
@@ -256,8 +242,7 @@ function addAttribute(props, prop, value, ctx, name) {
  * @returns {boolean}
  */
 function react(h) {
-  /** @type {unknown} */
-  const node = h('div', {})
+  const node = /** @type {unknown} */ (h('div', {}))
   return Boolean(
     node &&
       // @ts-expect-error Looks like a React node.
@@ -284,8 +269,7 @@ function hyperscript(h) {
  * @returns {boolean}
  */
 function vdom(h) {
-  /** @type {unknown} */
-  const node = h('div', {})
+  const node = /** @type {unknown} */ (h('div', {}))
   // @ts-expect-error Looks like a vnode.
   return node.type === 'VirtualNode'
 }
@@ -297,8 +281,7 @@ function vdom(h) {
  * @returns {boolean}
  */
 function vue(h) {
-  /** @type {unknown} */
-  const node = h('div', {})
+  const node = /** @type {unknown} */ (h('div', {}))
   // @ts-expect-error Looks like a Vue node.
   return Boolean(node && node.context && node.context._isVue)
 }
@@ -323,7 +306,8 @@ function parseStyle(value, tagName) {
            * @param {string} _
            * @param {string} $1
            * @returns {string}
-           */ (_, $1) => $1.toUpperCase()
+           */
+          (_, $1) => $1.toUpperCase()
         )
       ] = value
     })
