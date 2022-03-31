@@ -5,6 +5,7 @@
  * @typedef {import('vue').VNode} VueNode
  */
 
+import process from 'node:process'
 import test from 'tape'
 import {webNamespaces as ns} from 'web-namespaces'
 import {u} from 'unist-builder'
