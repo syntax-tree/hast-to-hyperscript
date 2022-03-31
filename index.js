@@ -327,7 +327,8 @@ function parseStyle(value, tagName) {
         )
       ] = value
     })
-  } catch (error) {
+  } catch (error_) {
+    const error = /** @type {Error} */ (error_)
     error.message =
       tagName + '[style]' + error.message.slice('undefined'.length)
     throw error
