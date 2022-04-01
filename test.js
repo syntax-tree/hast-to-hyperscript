@@ -1,8 +1,6 @@
 /**
  * @typedef {import('hast').Element} HastElement
  * @typedef {import('hast').Root} HastRoot
- * @typedef {import('vue').CreateElement} VueCreateElement
- * @typedef {import('vue').VNode} VueNode
  */
 
 import process from 'node:process'
@@ -19,8 +17,8 @@ import {rehype} from 'rehype'
 import vToString from 'vdom-to-html'
 import {createElement as r} from 'react'
 import {renderToStaticMarkup as rToString} from 'react-dom/server.js'
-import Vue from 'vue'
-import VueSSR from 'vue-server-renderer'
+import * as vue from 'vue'
+import serverRenderer from '@vue/server-renderer'
 import {toH} from './index.js'
 
 const processor = rehype().data('settings', {fragment: true})
@@ -404,57 +402,22 @@ test('hast-to-hyperscript', (t) => {
     t.end()
   })
 
-  t.test('should support `Vue`', (t) => {
-    const baseline = doc.replace(/<div>/, '<div data-server-rendered="true">')
-    /** @type {VueNode} */
-    let actual
-    /** @type {VueNode} */
-    let expected
-
-    t.plan(3)
-
-    Promise.all([vueToString(actualRender), vueToString(expectedRender)])
-      .then((all) => {
-        const actualString = all[0]
-        const expectedString = all[0]
-
-        t.deepEqual(clean(actual), clean(expected), 'equal syntax trees')
-        t.deepEqual(html(actualString), html(baseline), 'equal output')
-
-        t.deepEqual(
-          html(expectedString),
-          html(baseline),
-          'equal output baseline'
-        )
-      })
-      .catch(
-        /** @param {Error} error */ (error) => {
-          t.ifErr(error, 'did not expect an error')
-        }
-      )
-
-    /** @param {import('vue').CreateElement} h */
-    function actualRender(h) {
-      actual = toH(h, hast)
-      return actual
-    }
-
-    /** @param {import('vue').CreateElement} h */
-    function expectedRender(h) {
-      expected = h(
-        'div',
-        {key: 'h-1', attrs: {'data-server-rendered': 'true'}},
-        [
+  t.test('should support `Vue`', async (t) => {
+    const h = vue.h
+    const actual = await serverRenderer.renderToString(
+      vue.createSSRApp(() => toH(h, hast))
+    )
+    const expected = await serverRenderer.renderToString(
+      vue.createSSRApp(() => {
+        return h('div', {key: 'h-1', attrs: {'data-server-rendered': 'true'}}, [
           h(
             'h1',
             {
               key: 'h-2',
-              attrs: {
-                class: 'b c',
-                id: 'a',
-                hidden: true,
-                height: 2
-              }
+              id: 'a',
+              class: 'b c',
+              hidden: true,
+              height: 2
             },
             [
               'bravo ',
@@ -462,25 +425,22 @@ test('hast-to-hyperscript', (t) => {
                 'strong',
                 {
                   key: 'h-3',
-                  style: {color: 'red'},
-                  attrs: {
-                    foo: 'bar',
-                    camelCase: 'on off',
-                    'data-123': '456',
-                    'data-some': 'yes',
-                    'aria-valuenow': '1'
-                  }
+                  style: 'color: red',
+                  ignored: false,
+                  foo: 'bar',
+                  camelCase: 'on off',
+                  'data-some': 'yes',
+                  'data-123': '456',
+                  'aria-valuenow': '1'
                 },
                 ['charlie']
               ),
               ' delta',
               h('input', {
                 key: 'h-4',
-                attrs: {
-                  checked: true,
-                  type: 'file',
-                  accept: '.jpg, .jpeg'
-                }
+                checked: true,
+                type: 'file',
+                accept: '.jpg, .jpeg'
               })
             ]
           ),
@@ -488,39 +448,16 @@ test('hast-to-hyperscript', (t) => {
             'svg',
             {
               key: 'h-5',
-              attrs: {
-                xmlns: 'http://www.w3.org/2000/svg',
-                viewBox: '0 0 500 500'
-              }
+              xmlns: 'http://www.w3.org/2000/svg',
+              viewBox: '0 0 500 500'
             },
-            [h('circle', {key: 'h-6', attrs: {cx: 120, cy: 120, r: 100}})]
+            [h('circle', {key: 'h-6', cx: 120, cy: 120, r: 100})]
           )
-        ]
-      )
-      return expected
-    }
+        ])
+      })
+    )
 
-    /**
-     * @param {VueNode} node
-     * @returns {unknown}
-     */
-    function clean(node) {
-      remove(node)
-      return json(node)
-    }
-
-    /**
-     * @param {VueNode} node
-     */
-    function remove(node) {
-      let index = -1
-      delete node.context
-      if (node.children) {
-        while (++index < node.children.length) {
-          remove(node.children[index])
-        }
-      }
-    }
+    t.equal(actual, expected, 'equal output')
   })
 
   t.test('should support keys', (t) => {
@@ -814,14 +751,4 @@ function html(doc) {
  */
 function json(value) {
   return JSON.parse(JSON.stringify(value))
-}
-
-/**
- * @param {(v: VueCreateElement) => VueNode} render
- * @returns {Promise.<string>}
- */
-function vueToString(render) {
-  return VueSSR.createRenderer({template: ''}).renderToString(
-    new Vue({render}).$mount()
-  )
 }

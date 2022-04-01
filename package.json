@@ -70,7 +70,7 @@
     "unist-util-remove-position": "^4.0.0",
     "vdom-to-html": "^2.0.0",
     "virtual-dom": "^2.0.0",
-    "vue": "^2.0.0",
+    "vue": "^3.0.0",
     "vue-server-renderer": "^2.0.0",
     "xo": "^0.48.0"
   },

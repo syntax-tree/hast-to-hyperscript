@@ -214,6 +214,9 @@ function addAttribute(props, prop, value, ctx, name) {
     value = parseStyle(value, name)
   }
 
+  // Vue 3 (used in our tests) doesn’t need this anymore.
+  // Some major in the future we can drop Vue 2 support.
+  /* c8 ignore next 2 */
   if (ctx.vue) {
     if (info.property !== 'style') subprop = 'attrs'
   } else if (!info.mustUseProperty) {
@@ -281,6 +284,9 @@ function vdom(h) {
  * @returns {boolean}
  */
 function vue(h) {
+  // Vue 3 (used in our tests) doesn’t need this anymore.
+  // Some major in the future we can drop Vue 2 support.
+  /* c8 ignore next 3 */
   const node = /** @type {unknown} */ (h('div', {}))
   // @ts-expect-error Looks like a Vue node.
   return Boolean(node && node.context && node.context._isVue)
