@@ -8,18 +8,68 @@
 [![Backers][backers-badge]][collective]
 [![Chat][chat-badge]][chat]
 
-[**hast**][hast] utility to transform a [*tree*][tree] to something else through
-a [hyperscript][] interface.
+[hast][] utility to turn hast into React, Preact, Vue, etc.
+
+## Contents
+
+*   [What is this?](#what-is-this)
+*   [When should I use this?](#when-should-i-use-this)
+*   [Install](#install)
+*   [Use](#use)
+*   [API](#api)
+    *   [`toH(h, tree[, options|prefix])`](#tohh-tree-optionsprefix)
+    *   [`function h(name, props, children)`](#function-hname-props-children)
+*   [Examples](#examples)
+    *   [Example: React](#example-react)
+    *   [Example: Preact](#example-preact)
+    *   [Example: Vue](#example-vue)
+*   [Types](#types)
+*   [Compatibility](#compatibility)
+*   [Security](#security)
+*   [Related](#related)
+*   [Contribute](#contribute)
+*   [License](#license)
+
+## What is this?
+
+This package is a utility that can be used to turn hast into something else
+through a “hyperscript” interface.
+
+[`hyperscript`][hyperscript] is a rather old package that made HTML from
+JavaScript and its API was later modelled by `createElement` from
+[`react`][react] (and [`preact`][preact]) and `h` from
+`hyperscript`, [`virtual-dom`][virtual-dom] (and [`vue`][vue]).
+
+This package uses that API to translate between hast and anything else.
+
+## When should I use this?
+
+you can use this utility when you need to turn hast into something else,
+either through a “hyperscript” interface that already exists (`createElement`
+from `react` and `preact` or `h` from `hyperscript`, `virtual-dom`, `vue`),
+or through such a translation function that you make yourself.
 
 ## Install
 
-This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
-Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
-
-[npm][]:
+This package is [ESM only][esm].
+In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
 
 ```sh
 npm install hast-to-hyperscript
+```
+
+In Deno with [`esm.sh`][esmsh]:
+
+```js
+import {toH} from 'https://esm.sh/hast-to-hyperscript@10'
+```
+
+In browsers with [`esm.sh`][esmsh]:
+
+```html
+<script type="module">
+  import {toH} from 'https://esm.sh/hast-to-hyperscript@10?bundle'
+</script>
 ```
 
 ## Use
@@ -58,50 +108,45 @@ Yields:
 
 ## API
 
-This package exports the following identifiers: `toH`.
+This package exports the identifiers `toH`.
 There is no default export.
 
 ### `toH(h, tree[, options|prefix])`
 
-Transform a [**hast**][hast] [*tree*][tree] to something else through a
-[hyperscript][] interface.
+turn hast into React, Preact, Vue, etc.
 
 ###### Parameters
 
-*   `h` ([`Function`][h]) — Hyperscript function
-*   `tree` ([`Node`][node]) — [*Tree*][tree] to transform
-*   `prefix` — Treated as `{prefix: prefix}`
+*   `h` ([`Function`][h]) — hyperscript function
+*   `tree` ([`Node`][node]) — tree to transform
+*   `prefix` — treated as `{prefix: prefix}`
 *   `options.prefix` (`string` or `boolean`, optional)
-    — Prefix to use as a prefix for keys passed in `attrs` to `h()`,
-    this behavior is turned off by passing `false`, turned on by passing
+    — prefix to use as a prefix for keys passed in `props` to `h()`,
+    this behavior is turned off by passing `false` and turned on by passing
     a `string`.
     By default, `h-` is used as a prefix if the given `h` is detected as being
     `virtual-dom/h` or `React.createElement`
 *   `options.space` (enum, `'svg'` or `'html'`, default: `'html'`)
-    — Whether `node` is in the `'html'` or `'svg'` space.
-    If an `svg` element is found when inside the HTML space, `toH` automatically
-    switches to the SVG space when entering the element, and switches back when
-    exiting
+    — whether `node` is in the `'html'` or `'svg'` space.
+    If an `<svg>` element is found when inside the HTML space, `toH`
+    automatically switches to the SVG space when entering the element, and
+    switches back when exiting
 
 ###### Returns
 
 `*` — Anything returned by calling `h()`.
 
-### `function h(name, attrs, children)`
+### `function h(name, props, children)`
 
-Create an [*element*][element] from the given values.
-
-###### Content
-
-`h` is called with the node that is currently compiled as the context object
-(`this`).
+Create an element from the given values.
 
 ###### Parameters
 
-*   `name` (`string`) — Tag-name of element to create
-*   `attrs` (`Record<string, string>`) — Attributes to set
-*   `children` (`Array<any>`) — List of children (results of previously
-    called `h()`)
+*   `this` (`Node`) — node that is currently transformed
+*   `name` (`string`) — tag name of element to create
+*   `props` (`Record<string, string>`) — attributes to set
+*   `children` (`Array<any>`) — list of children (results of previously called
+    `h()`)
 
 ###### Returns
 
@@ -111,58 +156,127 @@ Create an [*element*][element] from the given values.
 
 ###### Nodes
 
-Most hyperscript implementations only support [*elements*][element] and
-[*texts*][text].
-[**hast**][hast] supports [*doctype*][doctype], [*comment*][comment], and
-[*root*][root] as well.
+Most hyperscript implementations only support elements and texts.
+hast supports doctype, comment, and root nodes as well.
 
 *   If anything other than an `element` or `root` node is given, `toH` throws
-*   If a [*root*][root] is given with no [*children*][child], an empty `div`
-    [*element*][element] is returned
-*   If a [*root*][root] is given with one [*element*][element] [*child*][child],
-    that element is transformed
-*   Otherwise, the children are wrapped in a `div` [*element*][element]
+*   If a `root` is given with no children, an empty `div` element is returned
+*   If a `root` is given with one element child, that element is transformed
+*   Otherwise, the children are wrapped in a `div` element
 
-If unknown nodes (a node with a [*type*][type] not defined by [**hast**][hast])
-are found as [*descendants*][descendant] of the given [*tree*][tree], they are
-ignored: only [*text*][text] and [*element*][element] are transformed.
+If unknown nodes (a node with a type not defined by hast) are found as
+descendants of the given tree, they are ignored: only text and element are
+transformed.
 
 ###### Support
 
 Although there are lots of libraries mentioning support for a hyperscript-like
 interface, there are significant differences between them.
-For example, [`hyperscript`][hyperscript] doesn’t support classes in `attrs` and
-[`virtual-dom/h`][vdom] needs an `attributes` object inside `attrs` most of the
-time.
+For example, [`hyperscript`][hyperscript] doesn’t support classes in `props` and
+[`virtual-dom/h`][virtual-dom] needs an `attributes` object inside `props` most
+of the time.
 `toH` works around these differences for:
 
-*   [`React.createElement`][react]
-*   Vue’s [`createElement`][vue]
-*   [`virtual-dom/h`][vdom]
+*   [`createElement` from `react`][react]
+*   `createElement` from Vue 2 and [`h` from `vue` 3+][vue]
+*   [`virtual-dom/h`][virtual-dom]
 *   [`hyperscript`][hyperscript]
+
+## Examples
+
+### Example: React
+
+```js
+import {createElement} from 'react'
+import {renderToStaticMarkup} from 'react-dom/server'
+import {h} from 'hastscript'
+import {toH} from 'hast-util-to-hyperscript'
+
+const tree = h('h1', ['Hello, ', h('em', 'world'), '!'])
+
+console.log(renderToStaticMarkup(toH(createElement, tree)));
+```
+
+Yields:
+
+```html
+<h1>Hello, <em>world</em>!</h1>
+```
+
+### Example: Preact
+
+```js
+import {createElement} from 'preact'
+import render from 'preact-render-to-string'
+import {h} from 'hastscript'
+import {toH} from 'hast-util-to-hyperscript'
+
+const tree = h('h1', ['Hello, ', h('em', 'world'), '!'])
+
+console.log(render(toH(createElement, tree)));
+```
+
+Yields:
+
+```html
+<h1>Hello, <em>world</em>!</h1>
+```
+
+### Example: Vue
+
+```js
+import * as vue from 'vue'
+import serverRenderer from '@vue/server-renderer'
+import {h} from 'hastscript'
+import {toH} from 'hast-util-to-hyperscript'
+
+const tree = h('h1', ['Hello, ', h('em', 'world'), '!'])
+
+console.log(await serverRenderer.renderToString(
+  vue.createSSRApp(() => toH(vue.h, tree))
+))
+```
+
+Yields:
+
+```html
+<h1>Hello, <em>world</em>!</h1>
+```
+
+## Types
+
+This package is fully typed with [TypeScript][].
+It exports the additional types `CreateElementLike` and `Options`.
+
+## Compatibility
+
+Projects maintained by the unified collective are compatible with all maintained
+versions of Node.js.
+As of now, that is Node.js 12.20+, 14.14+, and 16.0+.
+Our projects sometimes work with older versions, but this is not guaranteed.
 
 ## Security
 
 Use of `hast-to-hyperscript` can open you up to a
 [cross-site scripting (XSS)][xss] attack if the hast tree is unsafe.
-Use [`hast-util-sanitize`][sanitize] to make the hast tree safe.
+Use [`hast-util-sanitize`][hast-util-sanitize] to make the hast tree safe.
 
 ## Related
 
-*   [`hastscript`][hastscript]
-    — Hyperscript compatible interface for creating nodes
-*   [`hast-util-sanitize`][sanitize]
-    — Sanitize nodes
+*   [`hastscript`](https://github.com/syntax-tree/hastscript)
+    — hyperscript compatible interface for creating nodes
+*   [`hast-util-sanitize`][hast-util-sanitize]
+    — sanitize nodes
 *   [`hast-util-from-dom`](https://github.com/syntax-tree/hast-util-from-dom)
-    — Transform a DOM tree to hast
+    — transform a DOM tree to hast
 *   [`unist-builder`](https://github.com/syntax-tree/unist-builder)
-    — Create any unist tree
+    — create any unist tree
 *   [`xastscript`](https://github.com/syntax-tree/xastscript)
-    — Create a xast tree
+    — create a xast tree
 
 ## Contribute
 
-See [`contributing.md` in `syntax-tree/.github`][contributing] for ways to get
+See [`contributing.md`][contributing] in [`syntax-tree/.github`][health] for
 started.
 See [`support.md`][support] for ways to get help.
 
@@ -204,50 +318,40 @@ abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
+[esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
+[esmsh]: https://esm.sh
+
+[typescript]: https://www.typescriptlang.org
+
 [license]: license
 
 [author]: https://wooorm.com
 
-[contributing]: https://github.com/syntax-tree/.github/blob/HEAD/contributing.md
+[health]: https://github.com/syntax-tree/.github
 
-[support]: https://github.com/syntax-tree/.github/blob/HEAD/support.md
+[contributing]: https://github.com/syntax-tree/.github/blob/main/contributing.md
 
-[coc]: https://github.com/syntax-tree/.github/blob/HEAD/code-of-conduct.md
+[support]: https://github.com/syntax-tree/.github/blob/main/support.md
 
-[vdom]: https://github.com/Matt-Esch/virtual-dom/tree/HEAD/virtual-hyperscript
+[coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
+
+[xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
 [hyperscript]: https://github.com/hyperhype/hyperscript
 
-[react]: https://reactjs.org/docs/glossary.html#react-elements
+[react]: https://reactjs.org/docs/react-api.html#createelement
 
-[vue]: https://vuejs.org/v2/guide/render-function.html#createElement-Arguments
+[preact]: https://preactjs.com/guide/v8/api-reference/#preacth--preactcreateelement
 
-[hastscript]: https://github.com/syntax-tree/hastscript
+[virtual-dom]: https://github.com/Matt-Esch/virtual-dom/tree/master/virtual-hyperscript#hselector-properties-children
 
-[tree]: https://github.com/syntax-tree/unist#tree
-
-[child]: https://github.com/syntax-tree/unist#child
-
-[type]: https://github.com/syntax-tree/unist#type
-
-[descendant]: https://github.com/syntax-tree/unist#descendant
+[vue]: https://vuejs.org/api/render-function.html#h
 
 [hast]: https://github.com/syntax-tree/hast
 
 [node]: https://github.com/syntax-tree/hast#nodes
 
-[text]: https://github.com/syntax-tree/hast#text
+[hast-util-sanitize]: https://github.com/syntax-tree/hast-util-sanitize
 
-[doctype]: https://github.com/syntax-tree/hast#doctype
-
-[root]: https://github.com/syntax-tree/hast#root
-
-[comment]: https://github.com/syntax-tree/hast#comment
-
-[element]: https://github.com/syntax-tree/hast#element
-
-[h]: #function-hname-attrs-children
-
-[xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
-
-[sanitize]: https://github.com/syntax-tree/hast-util-sanitize
+[h]: #function-hname-props-children
