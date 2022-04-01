@@ -16,7 +16,7 @@ import {rehype} from 'rehype'
 // @ts-expect-error: hush
 import vToString from 'vdom-to-html'
 import {createElement as r} from 'react'
-import {renderToStaticMarkup as rToString} from 'react-dom/server.js'
+import {renderToStaticMarkup as rToString} from 'react-dom/server'
 import * as vue from 'vue'
 import serverRenderer from '@vue/server-renderer'
 import {toH} from './index.js'
