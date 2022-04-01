@@ -85,7 +85,7 @@ Transform a [**hast**][hast] [*tree*][tree] to something else through a
 
 ###### Returns
 
-`*` — Anything returned by invoking `h()`.
+`*` — Anything returned by calling `h()`.
 
 ### `function h(name, attrs, children)`
 
@@ -99,9 +99,9 @@ Create an [*element*][element] from the given values.
 ###### Parameters
 
 *   `name` (`string`) — Tag-name of element to create
-*   `attrs` (`Object.<string>`) — Attributes to set
-*   `children` (`Array.<* | string>`) — List of children (results of previously
-    invoking `h()`)
+*   `attrs` (`Record<string, string>`) — Attributes to set
+*   `children` (`Array<any>`) — List of children (results of previously
+    called `h()`)
 
 ###### Returns
 
