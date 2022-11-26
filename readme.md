@@ -190,7 +190,7 @@ of the time.
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {h} from 'hastscript'
-import {toH} from 'hast-util-to-hyperscript'
+import {toH} from 'hast-to-hyperscript'
 
 const tree = h('h1', ['Hello, ', h('em', 'world'), '!'])
 
@@ -209,7 +209,7 @@ Yields:
 import {createElement} from 'preact'
 import render from 'preact-render-to-string'
 import {h} from 'hastscript'
-import {toH} from 'hast-util-to-hyperscript'
+import {toH} from 'hast-to-hyperscript'
 
 const tree = h('h1', ['Hello, ', h('em', 'world'), '!'])
 
@@ -228,7 +228,7 @@ Yields:
 import * as vue from 'vue'
 import serverRenderer from '@vue/server-renderer'
 import {h} from 'hastscript'
-import {toH} from 'hast-util-to-hyperscript'
+import {toH} from 'hast-to-hyperscript'
 
 const tree = h('h1', ['Hello, ', h('em', 'world'), '!'])
 
