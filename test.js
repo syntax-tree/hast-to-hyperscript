@@ -3,15 +3,17 @@
  * @typedef {import('hast').Root} Root
  */
 
+import assert from 'node:assert/strict'
 import process from 'node:process'
-import test from 'tape'
+import test from 'node:test'
 import {webNamespaces} from 'web-namespaces'
 import {u} from 'unist-builder'
 import {removePosition} from 'unist-util-remove-position'
 import {fromHtml} from 'hast-util-from-html'
-import h from 'hyperscript'
+import hyperscript from 'hyperscript'
 import {createElement as r} from 'react'
 import {renderToStaticMarkup as rToString} from 'react-dom/server'
+import {h, s} from 'hastscript'
 import {h as v} from 'virtual-dom'
 // @ts-expect-error: hush
 import vs from 'virtual-dom/virtual-hyperscript/svg.js'
@@ -21,102 +23,83 @@ import * as vue from 'vue'
 import serverRenderer from '@vue/server-renderer'
 import {toH} from './index.js'
 
-test('toHyperscript', (t) => {
-  t.equal(typeof toH, 'function', 'should expose a function')
+test('toHyperscript', async (t) => {
+  assert.equal(typeof toH, 'function', 'should expose a function')
 
-  t.test('should throw if not given h', (t) => {
-    t.throws(() => {
+  assert.throws(
+    () => {
       // @ts-expect-error: runtime
-      toH(null, u('element', {tagName: ''}, []))
-    }, /h is not a function/)
+      toH(null, h())
+    },
+    /h is not a function/,
+    'should throw if not given h'
+  )
 
-    t.end()
-  })
-
-  t.test('should throw if not given a node', (t) => {
-    t.throws(() => {
+  assert.throws(
+    () => {
       // @ts-expect-error runtime.
-      toH(h)
-    }, /Expected root or element, not `undefined`/)
+      toH(hyperscript)
+    },
+    /Expected root or element, not `undefined`/,
+    'should throw if not given a node (1)'
+  )
 
-    t.throws(() => {
-      toH(h, u('text', 'Alpha'))
-    }, /Error: Expected root or element, not `text`/)
+  assert.throws(
+    () => {
+      toH(hyperscript, u('text', 'Alpha'))
+    },
+    /Error: Expected root or element, not `text`/,
+    'should throw if not given a node (2)'
+  )
 
-    t.throws(() => {
-      toH(h, u('text', 'value'))
-    }, /Expected root or element/)
+  assert.throws(
+    () => {
+      toH(hyperscript, u('text', 'value'))
+    },
+    /Expected root or element/,
+    'should throw if not given a node (3)'
+  )
 
-    t.end()
-  })
-
-  const hast = u('root', [
-    u(
-      'element',
-      {
-        tagName: 'h1',
-        properties: {id: 'a', className: ['b', 'c'], hidden: true, height: 2}
-      },
-      [
-        u('text', 'bravo '),
-        u('comment', 'Hello!'),
-        u(
-          'element',
-          {
-            tagName: 'strong',
-            properties: {
-              style: 'color: red',
-              // Unknown booleans are ignored.
-              ignored: false,
-              // Falsey known booleans are ignored.
-              disabled: 0,
-              // Unknown props are left as-is.
-              foo: 'bar',
-              // Unknown lists are space-separated.
-              camelCase: ['on', 'off'],
-              // Data properties.
-              dataSome: 'yes',
-              // Numeric-start data properties.
-              data123: '456',
-              // ARIA props.
-              ariaValuenow: '1'
-            }
-          },
-          [u('text', 'charlie')]
-        ),
-        u('text', ' delta'),
-        u(
-          'element',
-          {
-            tagName: 'input',
-            properties: {
-              checked: true,
-              type: 'file',
-              // Known comma-separated lists:
-              accept: ['.jpg', '.jpeg']
-            }
-          },
-          []
-        )
-      ]
-    ),
-    u(
-      'element',
-      {
-        tagName: 'svg',
-        properties: {
-          xmlns: 'http://www.w3.org/2000/svg',
-          viewBox: [0, 0, 500, 500]
-        }
-      },
-      [
-        u(
-          'element',
-          {tagName: 'circle', properties: {cx: 120, cy: 120, r: 100}},
-          []
-        )
-      ]
-    )
+  const hast = h(null, [
+    h('h1', {id: 'a', className: ['b', 'c'], hidden: true, height: 2}, [
+      'bravo ',
+      u('comment', 'Hello!'),
+      // Note: here we manually generate an `element`, to force properties.
+      u(
+        'element',
+        {
+          tagName: 'strong',
+          properties: {
+            style: 'color: red',
+            // Unknown booleans are ignored.
+            ignored: false,
+            // Falsey known booleans are ignored.
+            disabled: 0,
+            // Unknown props are left as-is.
+            foo: 'bar',
+            // Unknown lists are space-separated.
+            camelCase: ['on', 'off'],
+            // Data properties.
+            dataSome: 'yes',
+            // Numeric-start data properties.
+            data123: '456',
+            // ARIA props.
+            ariaValuenow: '1'
+          }
+        },
+        [u('text', 'charlie')]
+      ),
+      ' delta',
+      h('input', {
+        checked: true,
+        type: 'file',
+        // Known comma-separated lists:
+        accept: ['.jpg', '.jpeg']
+      })
+    ]),
+    s('svg', {xmlns: 'http://www.w3.org/2000/svg', viewBox: [0, 0, 500, 500]}, [
+      s('circle', {cx: 120, cy: 120, r: 100})
+    ])
   ])
 
   const doc = [
@@ -152,14 +135,14 @@ test('toHyperscript', (t) => {
     '</div>'
   ].join('')
 
-  t.test('should support `hyperscript`', (t) => {
+  await t.test('should support `hyperscript`', () => {
     // `hyperscript` does not support SVG (camelcased props).
     const baseline = doc.replace(/viewBox/, 'viewbox')
-    const actual = toH(h, hast)
-    const expected = h('div', [
-      h('h1#a.b.c', {hidden: '', attrs: {height: '2'}}, [
+    const actual = toH(hyperscript, hast)
+    const expected = hyperscript('div', [
+      hyperscript('h1#a.b.c', {hidden: '', attrs: {height: '2'}}, [
         'bravo ',
-        h(
+        hyperscript(
           'strong',
           {
             style: {color: 'red'},
@@ -170,28 +153,29 @@ test('toHyperscript', (t) => {
           'charlie'
         ),
         ' delta',
-        h('input', {checked: '', attrs: {type: 'file', accept: '.jpg, .jpeg'}})
+        hyperscript('input', {
+          checked: '',
+          attrs: {type: 'file', accept: '.jpg, .jpeg'}
+        })
       ]),
-      h(
+      hyperscript(
         'svg',
         {attrs: {xmlns: 'http://www.w3.org/2000/svg', viewbox: '0 0 500 500'}},
-        h('circle', {attrs: {cx: 120, cy: 120, r: 100}}, [])
+        hyperscript('circle', {attrs: {cx: 120, cy: 120, r: 100}}, [])
       )
     ])
 
     // @ts-expect-error `outerHTML` definitely does exist.
-    t.deepEqual(html(actual.outerHTML), html(baseline), 'equal output')
+    assert.deepEqual(html(actual.outerHTML), html(baseline), 'equal output')
 
-    t.deepEqual(
+    assert.deepEqual(
       html(expected.outerHTML),
       html(baseline),
       'equal output baseline'
     )
-
-    t.end()
   })
 
-  t.test('should support `virtual-dom/h`', (t) => {
+  await t.test('should support `virtual-dom/h`', () => {
     const baseline = doc.replace(/color:red;/, 'color: red;')
     /** @type {ReturnType<v>} */
     const actual = toH(v, hast)
@@ -252,20 +236,16 @@ test('toHyperscript', (t) => {
       )
     ])
 
-    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
-
-    t.deepEqual(html(vToString(actual)), html(baseline), 'equal output')
-
-    t.deepEqual(
+    assert.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    assert.deepEqual(html(vToString(actual)), html(baseline), 'equal output')
+    assert.deepEqual(
       html(vToString(expected)),
       html(baseline),
       'equal output baseline'
     )
-
-    t.end()
   })
 
-  t.test('should support `React.createElement` in `development`', (t) => {
+  await t.test('should support `React.createElement` in `development`', () => {
     const currentEnv = process.env.NODE_ENV
     const baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'development'
@@ -318,22 +298,20 @@ test('toHyperscript', (t) => {
       )
     )
 
-    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    assert.deepEqual(json(actual), json(expected), 'equal syntax trees')
 
-    t.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
+    assert.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
 
-    t.deepEqual(
+    assert.deepEqual(
       html(rToString(expected)),
       html(baseline),
       'equal output baseline'
     )
 
     process.env.NODE_ENV = currentEnv
-
-    t.end()
   })
 
-  t.test('should support `React.createElement` in `production`', (t) => {
+  await t.test('should support `React.createElement` in `production`', () => {
     const currentEnv = process.env.NODE_ENV
     const baseline = doc.replace(/color:red;/, 'color:red')
     process.env.NODE_ENV = 'production'
@@ -386,21 +364,20 @@ test('toHyperscript', (t) => {
       )
     )
 
-    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
+    assert.deepEqual(json(actual), json(expected), 'equal syntax trees')
 
-    t.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
+    assert.deepEqual(html(rToString(actual)), html(baseline), 'equal output')
 
-    t.deepEqual(
+    assert.deepEqual(
       html(rToString(expected)),
       html(baseline),
       'equal output baseline'
     )
 
     process.env.NODE_ENV = currentEnv
-    t.end()
   })
 
-  t.test('should support `Vue`', async (t) => {
+  await t.test('should support `Vue`', async () => {
     const h = vue.h
     const actual = await serverRenderer.renderToString(
       vue.createSSRApp(() => toH(h, hast))
@@ -455,98 +432,73 @@ test('toHyperscript', (t) => {
       })
     )
 
-    t.equal(actual, expected, 'equal output')
+    assert.equal(actual, expected, 'equal output')
   })
 
-  t.test('should support keys', (t) => {
-    t.equal(
+  await t.test('should support keys', () => {
+    assert.equal(
       // @ts-expect-error Types are wrong.
-      toH(h, u('element', {tagName: 'div'}, [])).key,
+      toH(hyperscript, h('div')).key,
       undefined,
       'should not patch `keys` normally'
     )
 
-    t.equal(
+    assert.equal(
       // @ts-expect-error Types are wrong.
-      toH(h, u('element', {tagName: 'div'}, []), 'prefix-').key,
+      toH(hyperscript, h('div'), 'prefix-').key,
       'prefix-1',
       'should patch `keys` when given'
     )
 
-    t.equal(
+    assert.equal(
       // @ts-expect-error Types are wrong.
-      toH(h, u('element', {tagName: 'div'}, []), true).key,
+      toH(hyperscript, h('div'), true).key,
       'h-1',
       'should patch `keys` when `true`'
     )
 
-    t.equal(
+    assert.equal(
       // @ts-expect-error Types are wrong.
-      toH(h, u('element', {tagName: 'div'}, []), false).key,
+      toH(hyperscript, h('div'), false).key,
       undefined,
       'should not patch `keys` when `false`'
     )
 
-    t.equal(
-      toH(v, u('element', {tagName: 'div'}, [])).key,
-      'h-1',
-      'should patch `keys` on vdom'
-    )
+    assert.equal(toH(v, h('div')).key, 'h-1', 'should patch `keys` on vdom')
 
-    t.equal(
-      toH(r, u('element', {tagName: 'div'}, [])).key,
-      'h-1',
-      'should patch `keys` on react'
-    )
-
-    t.end()
+    assert.equal(toH(r, h('div')).key, 'h-1', 'should patch `keys` on react')
   })
 
-  t.test('should support style and other funky props', (t) => {
-    t.deepEqual(
-      vToString(
-        toH(
-          v,
-          u('element', {tagName: 'div', properties: {style: 'color:red'}}, [])
-        )
-      ),
+  await t.test('should support style and other funky props', () => {
+    assert.deepEqual(
+      vToString(toH(v, h('div', {style: 'color:red'}))),
       '<div style="color: red;"></div>',
       'vdom: should patch a style declaration correctly'
     )
 
-    t.deepEqual(
+    assert.deepEqual(
       toH(
-        h,
-        u('element', {tagName: 'div', properties: {style: 'color: red'}}, [])
+        hyperscript,
+        h('div', {style: 'color: red'})
         // @ts-expect-error Types are wrong.
       ).outerHTML,
       '<div style="color:red;"></div>',
       'hyperscript: should parse a style declaration'
     )
 
-    t.deepEqual(
-      toH(
-        r,
-        u('element', {tagName: 'div', properties: {style: 'color: red'}}, [])
-      ).props,
+    assert.deepEqual(
+      toH(r, h('div', {style: 'color: red'})).props,
       {style: {color: 'red'}},
       'react: should parse a style declaration'
     )
 
-    t.deepEqual(
+    assert.deepEqual(
       toH(
         r,
-        u(
-          'element',
-          {
-            tagName: 'div',
-            properties: {
-              style:
-                'color: red; background-color: blue; -moz-transition: initial; -ms-transition: unset'
-            }
-          },
-          []
-        )
+        h('div', {
+          style:
+            'color: red; background-color: blue; -moz-transition: initial; -ms-transition: unset'
+        })
       ).props,
       {
         style: {
@@ -559,24 +511,18 @@ test('toHyperscript', (t) => {
       'react: should parse vendor prefixed in style declarations'
     )
 
-    t.throws(
+    assert.throws(
       () => {
-        toH(
-          r,
-          u(
-            'element',
-            {tagName: 'div', properties: {style: 'color:red; /*'}},
-            []
-          )
-        )
+        toH(r, h('div', {style: 'color:red; /*'}))
       },
       /^Error: div\[style]:1:12: End of comment missing$/,
       'react: should ignore invalid style declarations'
     )
 
-    t.deepEqual(
+    assert.deepEqual(
       toH(
         r,
+        // Important manual field names.
         u(
           'element',
           {
@@ -601,138 +547,116 @@ test('toHyperscript', (t) => {
       },
       'react: should transform unknown props to camelCase except for data and aria'
     )
-
-    t.end()
   })
 
-  t.test('should support space', (t) => {
-    t.equal(
-      toH(v, u('element', {tagName: 'div'}, [])).namespace,
-      null,
-      'should start in HTML'
-    )
+  await t.test('should support space', () => {
+    assert.equal(toH(v, h('div')).namespace, null, 'should start in HTML')
 
-    t.equal(
-      toH(v, u('element', {tagName: 'div'}, []), {space: 'svg'}).namespace,
+    assert.equal(
+      toH(v, h('div'), {space: 'svg'}).namespace,
       webNamespaces.svg,
       'should support `space: "svg"`'
     )
 
-    t.equal(
-      toH(v, u('element', {tagName: 'svg'}, [])).namespace,
+    assert.equal(
+      toH(v, s('svg')).namespace,
       webNamespaces.svg,
       'should infer `space: "svg"`'
     )
-
-    t.end()
   })
 
-  t.test('flattens a `root` with one element to that child', (t) => {
-    const actual = toH(
-      h,
-      u('root', [u('element', {tagName: 'h1', properties: {id: 'a'}}, [])])
-    )
-    const expected = h('h1#a')
+  await t.test('flattens a `root` with one element to that child', () => {
+    const actual = toH(hyperscript, h(null, [h('h1', {id: 'a'})]))
+    const expected = hyperscript('h1#a')
     const doc = '<h1 id="a"></h1>'
 
     // @ts-expect-error seems to exist fine 🤷‍♂️
-    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    t.end()
+    assert.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    assert.deepEqual(
+      html(expected.outerHTML),
+      html(doc),
+      'equal output baseline'
+    )
   })
 
-  t.test('flattens a `root` without children to a `div`', (t) => {
-    const actual = toH(h, u('root', []))
-    const expected = h('div')
+  await t.test('flattens a `root` without children to a `div`', () => {
+    const actual = toH(hyperscript, h(null))
+    const expected = hyperscript('div')
     const doc = '<div></div>'
 
     // @ts-expect-error Types are wrong.
-    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    t.end()
+    assert.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    assert.deepEqual(
+      html(expected.outerHTML),
+      html(doc),
+      'equal output baseline'
+    )
   })
 
-  t.test('flattens a `root` with a text child to a `div`', (t) => {
-    const actual = toH(h, u('root', [u('text', 'Alpha')]))
-    const expected = h('div', 'Alpha')
+  await t.test('flattens a `root` with a text child to a `div`', () => {
+    const actual = toH(hyperscript, h(null, 'Alpha'))
+    const expected = hyperscript('div', 'Alpha')
     const doc = '<div>Alpha</div>'
 
     // @ts-expect-error Types are wrong.
-    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    t.end()
+    assert.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    assert.deepEqual(
+      html(expected.outerHTML),
+      html(doc),
+      'equal output baseline'
+    )
   })
 
-  t.test('flattens a `root` with more children to a `div`', (t) => {
+  await t.test('flattens a `root` with more children to a `div`', () => {
     const actual = toH(
-      h,
-      u('root', [
-        u('element', {tagName: 'h1'}, [u('text', 'Alpha')]),
-        u('element', {tagName: 'p'}, [u('text', 'Bravo')])
-      ])
+      hyperscript,
+      h(null, [h('h1', 'Alpha'), h('p', 'Bravo')])
     )
-    const expected = h('div', [h('h1', 'Alpha'), h('p', 'Bravo')])
+    const expected = hyperscript('div', [
+      hyperscript('h1', 'Alpha'),
+      hyperscript('p', 'Bravo')
+    ])
     const doc = '<div><h1>Alpha</h1><p>Bravo</p></div>'
 
     // @ts-expect-error Types are wrong.
-    t.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
-    t.deepEqual(html(expected.outerHTML), html(doc), 'equal output baseline')
-    t.end()
+    assert.deepEqual(html(actual.outerHTML), html(doc), 'equal output')
+    assert.deepEqual(
+      html(expected.outerHTML),
+      html(doc),
+      'equal output baseline'
+    )
   })
 
-  t.test('should support mapping to React properties', (t) => {
+  await t.test('should support mapping to React properties', () => {
     const actual = toH(
       r,
-      u(
-        'element',
-        {
-          tagName: 'svg',
-          properties: {xmlnsXLink: 'http://www.w3.org/1999/xlink'}
-        },
-        [u('element', {tagName: 'line', properties: {strokeDashArray: 4}}, [])]
-      )
+      s('svg', {xmlnsXLink: 'http://www.w3.org/1999/xlink'}, [
+        s('line', {strokeDashArray: 4}, [])
+      ])
     )
     const expected = r(
       'svg',
-      {
-        key: 'h-1',
-        xmlnsXlink: 'http://www.w3.org/1999/xlink'
-      },
-      [
-        r('line', {
-          key: 'h-2',
-          strokeDasharray: 4
-        })
-      ]
+      {key: 'h-1', xmlnsXlink: 'http://www.w3.org/1999/xlink'},
+      [r('line', {key: 'h-2', strokeDasharray: 4})]
     )
 
-    t.deepEqual(json(actual), json(expected), 'equal syntax trees')
-    t.end()
+    assert.deepEqual(json(actual), json(expected), 'equal syntax trees')
   })
 
-  t.test('should use a node as a rendering context', (t) => {
-    /**
-     * @this {Element}
-     */
-    function mockR() {
-      return {node: this}
-    }
-
-    const node = u(
-      'element',
-      {
-        tagName: 'svg',
-        properties: {xmlnsXLink: 'http://www.w3.org/1999/xlink'}
+  await t.test('should use a node as a rendering context', () => {
+    const node = h('svg', {xmlnsXLink: 'http://www.w3.org/1999/xlink'}, [
+      h('line', {strokeDashArray: 4})
+    ])
+    const actual = toH(
+      /** @this {Element} */
+      function () {
+        return {node: this}
       },
-      [u('element', {tagName: 'line', properties: {strokeDashArray: 4}}, [])]
+      node
     )
-    const actual = toH(mockR, node)
 
-    t.equal(actual.node, node, 'equal rendering context')
-    t.end()
+    assert.equal(actual.node, node, 'equal rendering context')
   })
-
-  t.end()
 })
 
 /**
