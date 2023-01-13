@@ -22,8 +22,15 @@ import vToString from 'vdom-to-html'
 import * as vue from 'vue'
 import serverRenderer from '@vue/server-renderer'
 import {toH} from './index.js'
+import * as mod from './index.js'
 
-test('toHyperscript', async (t) => {
+test('toH', async (t) => {
+  assert.deepEqual(
+    Object.keys(mod).sort(),
+    ['toH'],
+    'should expose the public api'
+  )
+
   assert.equal(typeof toH, 'function', 'should expose a function')
 
   assert.throws(
