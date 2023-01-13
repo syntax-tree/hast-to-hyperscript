@@ -1,29 +1,27 @@
 /**
- * @typedef {import('hast').Element} HastElement
- * @typedef {import('hast').Root} HastRoot
+ * @typedef {import('hast').Element} Element
+ * @typedef {import('hast').Root} Root
  */
 
 import process from 'node:process'
 import test from 'tape'
-import {webNamespaces as ns} from 'web-namespaces'
+import {webNamespaces} from 'web-namespaces'
 import {u} from 'unist-builder'
 import {removePosition} from 'unist-util-remove-position'
+import {fromHtml} from 'hast-util-from-html'
 import h from 'hyperscript'
+import {createElement as r} from 'react'
+import {renderToStaticMarkup as rToString} from 'react-dom/server'
 import {h as v} from 'virtual-dom'
 // @ts-expect-error: hush
 import vs from 'virtual-dom/virtual-hyperscript/svg.js'
-import {rehype} from 'rehype'
 // @ts-expect-error: hush
 import vToString from 'vdom-to-html'
-import {createElement as r} from 'react'
-import {renderToStaticMarkup as rToString} from 'react-dom/server'
 import * as vue from 'vue'
 import serverRenderer from '@vue/server-renderer'
 import {toH} from './index.js'
 
-const processor = rehype().data('settings', {fragment: true})
-
-test('hast-to-hyperscript', (t) => {
+test('toHyperscript', (t) => {
   t.equal(typeof toH, 'function', 'should expose a function')
 
   t.test('should throw if not given h', (t) => {
@@ -238,7 +236,7 @@ test('hast-to-hyperscript', (t) => {
         'svg',
         {
           key: 'h-5',
-          namespace: ns.svg,
+          namespace: webNamespaces.svg,
           attributes: {
             xmlns: 'http://www.w3.org/2000/svg',
             viewBox: '0 0 500 500'
@@ -247,7 +245,7 @@ test('hast-to-hyperscript', (t) => {
         [
           vs('circle', {
             key: 'h-6',
-            namespace: ns.svg,
+            namespace: webNamespaces.svg,
             attributes: {cx: 120, cy: 120, r: 100}
           })
         ]
@@ -616,13 +614,13 @@ test('hast-to-hyperscript', (t) => {
 
     t.equal(
       toH(v, u('element', {tagName: 'div'}, []), {space: 'svg'}).namespace,
-      ns.svg,
+      webNamespaces.svg,
       'should support `space: "svg"`'
     )
 
     t.equal(
       toH(v, u('element', {tagName: 'svg'}, [])).namespace,
-      ns.svg,
+      webNamespaces.svg,
       'should infer `space: "svg"`'
     )
 
@@ -714,7 +712,7 @@ test('hast-to-hyperscript', (t) => {
 
   t.test('should use a node as a rendering context', (t) => {
     /**
-     * @this {HastElement}
+     * @this {Element}
      */
     function mockR() {
       return {node: this}
@@ -739,10 +737,12 @@ test('hast-to-hyperscript', (t) => {
 
 /**
  * @param {string} doc
- * @returns {HastRoot}
+ * @returns {Root}
  */
 function html(doc) {
-  return removePosition(processor.parse(doc), true)
+  const tree = fromHtml(doc, {fragment: true})
+  removePosition(tree, true)
+  return tree
 }
 
 /**
