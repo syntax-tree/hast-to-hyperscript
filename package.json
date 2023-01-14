@@ -1,24 +1,9 @@
 {
   "name": "hast-to-hyperscript",
   "version": "10.0.1",
-  "description": "hast utility to transform to something else (react, vue, etc) through a hyperscript DSL",
+  "description": "Legacy hast utility to transform to something else",
   "license": "MIT",
-  "keywords": [
-    "unist",
-    "hast",
-    "hast-util",
-    "util",
-    "utility",
-    "html",
-    "change",
-    "transform",
-    "rehype",
-    "vdom",
-    "virtual",
-    "dom",
-    "hyperscript",
-    "dsl"
-  ],
+  "keywords": [],
   "repository": "syntax-tree/hast-to-hyperscript",
   "bugs": "https://github.com/syntax-tree/hast-to-hyperscript/issues",
   "funding": {
