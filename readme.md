@@ -1,23 +1,10 @@
 # hast-to-hyperscript
 
-**Stability: Legacy**.
-This package is no longer recommended for use.
-It’s still covered by semantic-versioning guarantees and not yet deprecated,
-but use of this package should be avoided.
-Please use [`hast-util-to-jsx-runtime`][hast-util-to-jsx-runtime] instead,
-which is much better.
+Deprecated: use [`hast-util-to-jsx-runtime`][hast-util-to-jsx-runtime] instead,
+which is much better :)
 
-Legacy [documentation for this package](https://github.com/syntax-tree/hast-to-hyperscript/tree/6f6e746)
-is still available in Git.
+[Git][] is still intact and previous versions can still be used without warnings.
 
-## License
-
-[MIT][license] © [Titus Wormer][author]
-
-<!-- Definitions -->
-
-[license]: license
-
-[author]: https://wooorm.com
+[git]: https://github.com/syntax-tree/hast-to-hyperscript/tree/a9f5958fffef49568c6bb1de1d003a1885170033
 
 [hast-util-to-jsx-runtime]: https://github.com/syntax-tree/hast-util-to-jsx-runtime
